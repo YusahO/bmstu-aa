@@ -1,5 +1,6 @@
 **.vscode**
 **build**
+!build.sh
 *.aux
 *.bbl
 *.blg
@@ -10,3 +11,4 @@
 *.toc
 *.synctex.gz
 **svg-inkscape**
+**venv**

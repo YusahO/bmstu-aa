@@ -11,14 +11,14 @@ int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose
     int len1 = word1.length();
     int len2 = word2.length();
 
-    int **mat = Matrix::Allocate(len1 + 1, len2 + 1);
+    int **mat = Matrix::Allocate(len2 + 1, len1 + 1);
     if (!mat)
         return -1;
 
     mat[0][0] = 0;
-    for (int i = 0; i <= len1; ++i)
+    for (int i = 0; i <= len2; ++i)
     {
-        for (int j = 0; j <= len2; ++j)
+        for (int j = 0; j <= len1; ++j)
         {
             if (i == 0)
             {
@@ -30,12 +30,12 @@ int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose
             }
             else
             {
-                int subsCost = word1[j - 1] != word2[i - 1];
+                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
 
                 mat[i][j] = min(
                     mat[i - 1][j] + 1,
                     mat[i][j - 1] + 1,
-                    mat[i - 1][j - 1] + subsCost);
+                    mat[i - 1][j - 1] + cost);
             }
         }
     }
@@ -43,8 +43,8 @@ int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose
     if (verbose)
         Matrix::Print(mat, word1, word2);
 
-    int res = mat[len1][len2];
-    Matrix::Free(mat, len1);
+    int res = mat[len2][len1];
+    Matrix::Free(mat, len2 + 1);
 
     return res;
 }
@@ -54,14 +54,14 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
     int len1 = word1.length();
     int len2 = word2.length();
 
-    int **mat = Matrix::Allocate(len1 + 1, len2 + 1);
+    int **mat = Matrix::Allocate(len2 + 1, len1 + 1);
     if (!mat)
         return -1;
 
     mat[0][0] = 0;
-    for (int i = 0; i <= len1; ++i)
+    for (int i = 0; i <= len2; ++i)
     {
-        for (int j = 0; j <= len2; ++j)
+        for (int j = 0; j <= len1; ++j)
         {
             if (i == 0)
             {
@@ -73,14 +73,14 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
             }
             else
             {
-                int subsCost = word1[i - 1] != word2[j - 1];
+                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
 
                 mat[i][j] = min(
                     mat[i - 1][j] + 1,
                     mat[i][j - 1] + 1,
-                    mat[i - 1][j - 1] + subsCost);
+                    mat[i - 1][j - 1] + cost);
 
-                if (word1[i - 2] == word2[j - 1] && word1[i - 1] == word2[j - 2])
+                if (word1[j - 2] == word2[i - 1] && word1[j - 1] == word2[i - 2])
                 {
                     mat[i][j] = std::min(
                         mat[i][j],
@@ -93,8 +93,8 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
     if (verbose)
         Matrix::Print(mat, word1, word2);
 
-    int res = mat[len1][len2];
-    Matrix::Free(mat, len1);
+    int res = mat[len2][len1];
+    Matrix::Free(mat, len2 + 1);
 
     return res;
 }
@@ -106,13 +106,12 @@ int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, in
     if (ind2 == 0)
         return ind1;
 
-    if (word1[ind1 - 1] == word2[ind2 - 1])
-        return DamLevRec(word1, word2, ind1 - 1, ind2 - 1);
+    int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
 
-    int res = 1 + min(
-        DamLevRec(word1, word2, ind1, ind2 - 1),       // удаление
-        DamLevRec(word1, word2, ind1 - 1, ind2),       // вставка
-        DamLevRec(word1, word2, ind1 - 1, ind2 - 1));  // замена
+    int res = min(
+        DamLevRec(word1, word2, ind1, ind2 - 1) + 1,
+        DamLevRec(word1, word2, ind1 - 1, ind2) + 1,
+        DamLevRec(word1, word2, ind1 - 1, ind2 - 1) + cost);
 
     if (ind1 > 1 && ind2 > 1 && word1[ind1 - 1] == word2[ind2 - 2] && word1[ind1 - 2] == word2[ind2 - 1])
         res = std::min(res, DamLevRec(word1, word2, ind1 - 2, ind2 - 2) + 1);
@@ -120,26 +119,43 @@ int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, in
     return res;
 }
 
-int DamLevRecCache(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2, int **dp)
+static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2, int **memo)
 {
     if (ind1 == 0)
         return ind2;
+
     if (ind2 == 0)
         return ind1;
 
-    if (dp[ind1 - 1][ind2 - 1] != -1)
-        return dp[ind1 - 1][ind2 - 1];
+    if (memo[ind2][ind1] != -1)
+        return memo[ind2][ind1];
+    
+    int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
 
-    if (word1[ind1 - 1] == word2[ind2 - 1])
-        return dp[ind1 - 1][ind2 - 1] = DamLevRecCache(word1, word2, ind1 - 1, ind2 - 1, dp);
-
-    int res = dp[ind1 - 1][ind2 - 1] = 1 + min(
-        DamLevRecCache(word1, word2, ind1, ind2 - 1, dp),       // удаление
-        DamLevRecCache(word1, word2, ind1 - 1, ind2, dp),       // вставка
-        DamLevRecCache(word1, word2, ind1 - 1, ind2 - 1, dp));  // замена  
+    int res = min(
+        DamLevRecCacheImpl(word1, word2, ind1, ind2 - 1, memo) + 1,
+        DamLevRecCacheImpl(word1, word2, ind1 - 1, ind2, memo) + 1,
+        DamLevRecCacheImpl(word1, word2, ind1 - 1, ind2 - 1, memo) + cost
+    );
 
     if (ind1 > 1 && ind2 > 1 && word1[ind1 - 1] == word2[ind2 - 2] && word1[ind1 - 2] == word2[ind2 - 1])
-        res = std::min(res, DamLevRecCache(word1, word2, ind1 - 2, ind2 - 2, dp) + 1);
+        res = std::min(res, DamLevRecCacheImpl(word1, word2, ind1 - 2, ind2 - 2, memo) + 1);
 
+    memo[ind2][ind1] = res;
+    return res;
+}
+
+int DamLevRecCache(const std::wstring &word1, const std::wstring &word2)
+{
+    int len1 = word1.length();
+    int len2 = word2.length();
+
+    int **memo = Matrix::Allocate(len2 + 1, len1 + 1, -1);
+    if (!memo)
+        return -1;
+    
+    int res = DamLevRecCacheImpl(word1, word2, len1, len2, memo);
+    
+    Matrix::Free(memo, len2 + 1);
     return res;
 }

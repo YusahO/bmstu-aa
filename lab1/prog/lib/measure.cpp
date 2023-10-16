@@ -12,6 +12,7 @@ std::wstring GenerateWord(unsigned long len)
         "абвгдеёжзийклмнопрстуфхцчшщъыьэюя";
 
     std::wstring word;
+    word.reserve(len);
 
     for (std::size_t i = 0; i < len; ++i)
         word.push_back(symbols[rand() % (symbols.length() - 1)]);
@@ -59,15 +60,10 @@ double MeasureCPUTime(const std::wstring &word1, const std::wstring &word2, Recu
 
 double MeasureCPUTime(const std::wstring &word1, const std::wstring &word2, RecursiveCacheFunc fn)
 {
-    int len1 = word1.length();
-    int len2 = word2.length();
-
-    int **dp = Matrix::Allocate(DP_MatrixSize, DP_MatrixSize);
-
     long long beg, end;
 
     beg = GetThreadCpuTimeNs();
-    int res = fn(word1, word2, len1, len2, dp);
+    int res = fn(word1, word2);
     end = GetThreadCpuTimeNs();
 
     return (double)(end - beg);
