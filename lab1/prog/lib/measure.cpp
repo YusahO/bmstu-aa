@@ -99,11 +99,11 @@ void TimeMeasure(int maxLen, int iters)
         {
             times[0] += MeasureCPUTime(word1, word2, LevNonRec);
             times[1] += MeasureCPUTime(word1, word2, DamLevNonRec);
+            times[3] += MeasureCPUTime(word1, word2, DamLevRecCache);
 
             if (i < 11)
             {
                 times[2] += MeasureCPUTime(word1, word2, DamLevRec);
-                times[3] += MeasureCPUTime(word1, word2, DamLevRecCache);
             }
         }
 
@@ -118,14 +118,15 @@ void TimeMeasure(int maxLen, int iters)
 
         if (i < 11)
         {
-            std::wcout << std::fixed << std::setprecision(2) << std::setw(13) << times_2 << L" │ "
-            << std::fixed << std::setprecision(2) << std::setw(13) << times_3 << L" ║\n";
+            std::wcout << std::fixed << std::setprecision(2) << std::setw(13) << times_2 << L" │ ";
         }
         else
         {
-            std::wcout << std::fixed << std::setprecision(2) << std::setw(13) << '-' << L" │ "
-            << std::fixed << std::setprecision(2) << std::setw(13) << '-' << L" ║\n";
+            std::wcout << std::fixed << std::setprecision(2) << std::setw(13) << '-' << L" │ ";
+            // << std::fixed << std::setprecision(2) << std::setw(13) << '-' << L" ║\n";
         }
+
+        std::wcout << std::fixed << std::setprecision(2) << std::setw(13) << times_3 << L" ║\n";
 
         if (i < 10)
             ++i;

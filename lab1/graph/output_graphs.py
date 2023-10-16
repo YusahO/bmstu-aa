@@ -1,5 +1,6 @@
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 
 def parse_table(path):
     with open(path, 'r') as tf:
@@ -19,6 +20,19 @@ def output_nonrec(x, *y):
     plt.legend()
     plt.show()
 
+def output_rec(x, *y):
+    # x = np.log(np.array(x))
+    loged_y = np.log(np.array(y[0]))
+    plt.plot(x, loged_y, color='r', marker='o', linestyle=':', label='Рекурсивный алгоритм Дамерау-Левенштейна')
+
+    loged_y = np.log(np.array(y[1]))
+    plt.plot(x, loged_y, color='b', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
+    plt.grid(True)
+    plt.xlabel('Длина (симв.)')
+    plt.ylabel('Время (нс)')
+    plt.legend()
+    plt.show()
+
 
 def main():
     data = parse_table('graph/table.txt')
@@ -30,6 +44,7 @@ def main():
     damlev_rec_cached = list(float(data[i][4]) for i, _ in enumerate(data) if i < 10)
 
     output_nonrec(iter_indices, lev_iter, damlev_iter)
+    output_rec(iter_indices[:10], damlev_rec, damlev_rec_cached)
 
     return 0
 
