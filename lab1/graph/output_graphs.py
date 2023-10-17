@@ -12,35 +12,39 @@ def parse_table(path):
     return data
 
 def output_nonrec(x, *y):
-    plt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Левенштейна')
-    plt.plot(x, y[1], color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
-    plt.grid(True)
+    fig = plt.figure(figsize=(10, 7))
+    splt = fig.add_subplot()
+    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Левенштейна')
+    splt.plot(x, y[1], color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
+    splt.grid(True)
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (нс)')
-    plt.legend()
+    splt.legend()
     plt.show()
 
 def output_rec(x, *y):
-    # x = np.log(np.array(x))
-    loged_y = np.log(np.array(y[0]))
-    plt.plot(x, loged_y, color='r', marker='o', linestyle=':', label='Рекурсивный алгоритм Дамерау-Левенштейна')
-
-    loged_y = np.log(np.array(y[1]))
-    plt.plot(x, loged_y, color='b', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
-    plt.grid(True)
+    fig = plt.figure(figsize=(10, 7))
+    splt = fig.add_subplot()
+    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Рекурсивный алгоритм Дамерау-Левенштейна')
+    splt.plot(x, y[1], color='b', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
+    splt.set_yscale('log')
+    splt.grid(True)
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (нс)')
-    plt.legend()
+    splt.legend()
     plt.show()
 
 def output_fastest(x, *y):
-    plt.plot(x, np.log(y[0]), color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
-    plt.plot(x, np.log(y[1]), color='g', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна')
-    plt.plot(x, np.log(y[2]), color='b', marker='s', linestyle='-.', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
-    plt.grid(True)
+    fig = plt.figure(figsize=(10, 7))
+    splt = fig.add_subplot()
+    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
+    splt.plot(x, y[1], color='g', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна')
+    splt.plot(x, y[2], color='b', marker='s', linestyle='-.', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
+    splt.set_yscale('log')
+    splt.grid(True)
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (нс)')
-    plt.legend()
+    splt.legend()
     plt.show()
 
 
