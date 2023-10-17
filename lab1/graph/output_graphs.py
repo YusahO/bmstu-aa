@@ -33,6 +33,16 @@ def output_rec(x, *y):
     plt.legend()
     plt.show()
 
+def output_fastest(x, *y):
+    plt.plot(x, np.log(y[0]), color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
+    plt.plot(x, np.log(y[1]), color='g', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна')
+    plt.plot(x, np.log(y[2]), color='b', marker='s', linestyle='-.', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
+    plt.grid(True)
+    plt.xlabel('Длина (симв.)')
+    plt.ylabel('Время (нс)')
+    plt.legend()
+    plt.show()
+
 
 def main():
     data = parse_table('graph/table.txt')
@@ -41,10 +51,11 @@ def main():
     lev_iter = list(float(iter[1]) for iter in data)
     damlev_iter = list(float(iter[2]) for iter in data)
     damlev_rec = list(float(data[i][3]) for i, _ in enumerate(data) if i < 10)
-    damlev_rec_cached = list(float(data[i][4]) for i, _ in enumerate(data) if i < 10)
+    damlev_rec_cached = list(float(data[i][4 if i < 10 else 3]) for i, _ in enumerate(data))
 
     output_nonrec(iter_indices, lev_iter, damlev_iter)
-    output_rec(iter_indices[:10], damlev_rec, damlev_rec_cached)
+    output_rec(iter_indices[:10], damlev_rec, damlev_rec_cached[:10])
+    output_fastest(iter_indices[:10], damlev_iter[:10], damlev_rec[:10], damlev_rec_cached[:10])
 
     return 0
 
