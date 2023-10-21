@@ -1,3 +1,5 @@
+#!./graph/venv/bin/python3
+
 import re
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,13 +16,13 @@ def parse_table(path):
 def output_nonrec(x, *y):
     fig = plt.figure(figsize=(10, 7))
     splt = fig.add_subplot()
-    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Левенштейна')
-    splt.plot(x, y[1], color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
+    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Левенштейна')
+    splt.plot(x, np.divide(y[1], 1000), color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
     splt.grid(True)
     plt.xlabel('Длина (симв.)')
-    plt.ylabel('Время (нс)')
+    plt.ylabel('Время (мс)')
     splt.legend()
-    plt.show()
+    plt.savefig('report/images/nonrec.svg')
 
 def output_rec(x, *y):
     fig = plt.figure(figsize=(10, 7))
@@ -32,7 +34,7 @@ def output_rec(x, *y):
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (нс)')
     splt.legend()
-    plt.show()
+    plt.savefig('report/images/rec.svg')
 
 def output_fastest(x, *y):
     fig = plt.figure(figsize=(10, 7))
@@ -45,7 +47,7 @@ def output_fastest(x, *y):
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (нс)')
     splt.legend()
-    plt.show()
+    plt.savefig('report/images/dl_all.svg')
 
 
 def main():
@@ -55,7 +57,7 @@ def main():
     lev_iter = list(float(iter[1]) for iter in data)
     damlev_iter = list(float(iter[2]) for iter in data)
     damlev_rec = list(float(data[i][3]) for i, _ in enumerate(data) if i < 10)
-    damlev_rec_cached = list(float(data[i][4 if i < 10 else 3]) for i, _ in enumerate(data))
+    damlev_rec_cached = list(float(data[i][4]) for i, _ in enumerate(data) if i < 10)
 
     output_nonrec(iter_indices, lev_iter, damlev_iter)
     output_rec(iter_indices[:10], damlev_rec, damlev_rec_cached[:10])

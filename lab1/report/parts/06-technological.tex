@@ -1,27 +1,27 @@
 \chapter{Технологическая часть}
 
-В данном разделе приведены средства реализации программного обеспечения, сведения о модулях программы, листинг кода и функцио\-нальные тесты.
+В данном разделе приведены средства реализации программного обеспечения, сведения о модулях программы, листинг кода и функциональные тесты.
 
 \section{Средства реализации}
 
-В качестве языка, используемого при написании данной лабора\-торной работы, был выбран язык C++ \cite{cpp-lang}. Этот выбор обусловлен тем, что в данном языке программирования имеется контей\-нер \texttt{std::wstring}, представляющий собой массив символов типа \texttt{std::wchar\_t}. Также в языке С++ имеется библиотека \texttt{<ctime>}, позволяющая выполнять замеры процессорного времени.
+В качестве языка программирования, используемого при написании данной лабораторной работы, был выбран C++ \cite{cpp-lang}, так как в нем имеется контейнер \texttt{std::wstring}, представляющий собой массив символов \texttt{std::wchar\_t}, и библиотека \texttt{<ctime>}, позволяющая производить замеры процессорного времени.
 
-В качестве средства написания кода была выбрана кроссплатфор\-менная среда разработки \textit{Visual Studio Code}, т.к. она предоставляет ши\-рокий функционал для проектирования, разработки и отладки ПО.
+В качестве средства написания кода была выбрана кроссплатформенная среда разработки \textit{Visual Studio Code} за счет того, что она предоставляет функционал для проектирования, разработки и отладки ПО.
 
 \section{Сведения о модулях программы}
 
 Данная программа разбита на следующие модули:
 
 \begin{itemize}
-    \item \texttt{main.cpp} --- файл, содержащий точку входа в программу;
-    \item \texttt{matrix.cpp} --- файл, содержащий функции создания матрицы, ее освобождения и вывода на экран;
-    \item \texttt{algorithms.cpp} --- файл, содержащий реализации алгоритмов поиска расстояний Левенштейна и Дамерау\,--\,Левенштейна;
-    \item \texttt{measure.cpp} --- файл, содержащий функции, замеряющие процес\-сорное время выполнения реализуемых алгоритмов.
+    \item \texttt{main.cpp}~--- файл, содержащий точку входа в программу;
+    \item \texttt{matrix.cpp}~--- файл, содержащий функции создания матрицы, ее освобождения и вывода на экран;
+    \item \texttt{algorithms.cpp}~--- файл, содержащий реализации алгоритмов поиска расстояний Левенштейна и Дамерау~---~Левенштейна;
+    \item \texttt{measure.cpp}~--- файл, содержащий функции, замеряющие процессорное время выполнения реализуемых алгоритмов.
 \end{itemize}
 
 \section{Реализация алгоритмов}
 
-\begin{lstlisting}[caption={Функция \texttt{max}, используемая в алгоритмах}]
+\begin{lstlisting}[caption={Функция \texttt{min}, используемая в реализациях алгоритмов}]
 template <typename T>
 static T min(T x, T y, T z)
 {
@@ -78,7 +78,7 @@ int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау\,--\,Левенштейна (часть 1)]
+\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау~---~Левенштейна (часть 1)]
 int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose)
 {
     int len1 = word1.length();
@@ -93,7 +93,7 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
     {
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау\,--\,Левенштейна (часть 2)]
+\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау~---~Левенштейна (часть 2)]
         for (int j = 0; j <= len1; ++j)
         {
             if (i == 0)
@@ -133,7 +133,7 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау\,--\,Левенштейна]
+\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна]
 int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2)
 {
     if (ind1 == 0)
@@ -155,7 +155,7 @@ int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, in
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау\,--\,Левенштейна с кэшированием (реализация) (часть 1)]
+\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (реализация) (часть 1)]
 static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2, int **memo)
 {
     if (ind1 == 0)
@@ -170,7 +170,7 @@ static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &wor
     int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау\,--\,Левенштейна с кэшированием (реализация) (часть 2)]
+\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (реализация) (часть 2)]
     int res = min(
         DamLevRecCacheImpl(word1, word2, ind1, ind2 - 1, memo) + 1,
         DamLevRecCacheImpl(word1, word2, ind1 - 1, ind2, memo) + 1,
@@ -185,7 +185,7 @@ static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &wor
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау\,--\,Левенштейна с кэшированием (оберточная функция)]
+\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (оберточная функция)]
 int DamLevRecCache(const std::wstring &word1, const std::wstring &word2)
 {
     int len1 = word1.length();
@@ -204,50 +204,47 @@ int DamLevRecCache(const std::wstring &word1, const std::wstring &word2)
 
 \section{Функциональные тесты}
 
+\begin{filecontents*}{parts/func_tests.csv}
+а,б,1,1,1,1
+a,b,1,1,1,1
+r,r,0,0,0,0
+сердце,солнце,3,3,3,3
+стол,стул,1,1,1,1
+кот,ток,2,2,2,2
+кто,кот,2,1,1,1
+Вениамин,Венгрия,4,4,4,4
+стол,столы,1,1,1,1
+\end{filecontents*}
+
 \begin{table}[H]
-	\small
+    \small
 	\begin{center}
-		\begin{threeparttable}
 		\caption{Функциональные тесты}
 		\label{tbl:func_tests}
-		\begin{tabular}{|c|c|c|c|c|c|}
-			\hline
-			\multicolumn{2}{|c|}{\bfseries Входные данные}
-			& \multicolumn{4}{c|}{\bfseries Расстояние и алгоритм} \\ 
-			\hline 
-			&
-			& \multicolumn{1}{c|}{\bfseries Левенштейна} 
-			& \multicolumn{3}{c|}{\bfseries Дамерау\,--\,Левенштейна} \\ \cline{3-6}
-			
-			\bfseries Строка 1 & \bfseries Строка 2 & \bfseries Итеративный & \bfseries Итеративный
-			
-			& \multicolumn{2}{c|}{\bfseries Рекурсивный} \\ \cline{5-6}
-			& & & & \bfseries Без кэша & \bfseries С кэшем \\
-			\hline
-			а & б & 1 & 1 & 1 & 1 \\
-			\hline
-			a & b & 1 & 1 & 1 & 1 \\
-			\hline
-			r & r & 0 & 0 & 0 & 0 \\
-			\hline
-			сердце & солнце & 3 & 3 & 3 & 3 \\
-			\hline
-			стол & стул & 1 & 1 & 1 & 1 \\
-			\hline
-			кот & ток & 2 & 2 & 2 & 2 \\
-			\hline
-			кто & кот & 2 & 1 & 1 & 1 \\
-			\hline
-			Вениамин & Венгрия & 4 & 4 & 4 & 4 \\
+        \begin{tabular}{|c|c|c|c|c|c|}
             \hline
-			стол & столы & 1 & 1 & 1 & 1 \\
-			\hline
-		\end{tabular}	
-		\end{threeparttable}
+            \multicolumn{2}{|c|}{\bfseries Входные данные}
+            & \multicolumn{4}{c|}{\bfseries Расстояние и алгоритм} \\ 
+            \hline 
+            &
+            & \multicolumn{1}{c|}{\bfseries Левенштейна} 
+            & \multicolumn{3}{c|}{\bfseries Дамерау~---~Левенштейна} \\ \cline{3-6}
+            
+            \bfseries Строка 1 & \bfseries Строка 2 & \bfseries Итеративный & \bfseries Итеративный
+            
+            & \multicolumn{2}{c|}{\bfseries Рекурсивный} \\ \cline{5-6}
+            & & & & \bfseries Без кэша & \bfseries С кэшем
+
+            \csvreader[separator=comma]{parts/func_tests.csv}{}{% 
+                \\ \hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi
+            }
+            \\ \hline
+        \end{tabular}
 	\end{center}
 \end{table}
 
 \section*{Вывод}
 \addcontentsline{toc}{section}{Вывод}
 
-Были реализованы алгоритмы Левенштейна (итеративно) и Дамерау\,--\,Левенштейна (итеративно, рекурсивно, рекурсивно с кэшированием). Проведено тестирование реализованных алгортимов.
+Были реализованы алгоритмы Левенштейна (итеративно) и Дамерау~---~Левенштейна (итеративно, рекурсивно, рекурсивно с кэшированием).
+Проведено тестирование реализованных алгортимов.

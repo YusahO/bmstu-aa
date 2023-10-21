@@ -9,6 +9,8 @@
 
 \usepackage[14pt]{extsizes}
 
+\usepackage{hyphsubst}
+
 \usepackage{caption}
 \captionsetup[table]{justification=raggedright,singlelinecheck=off}
 \captionsetup[lstlisting]{justification=raggedright,singlelinecheck=off}
@@ -182,11 +184,14 @@
 \svgsetup{inkscapelatex=false}
 
 \usepackage{float}
-% \usepackage{placeins}
+
+\usepackage{csvsimple}
 
 \usepackage[justification=centering]{caption} % Настройка подписей float объектов
 
-\usepackage[unicode,pdftex]{hyperref} % Ссылки в pdf
+\usepackage[hyphens]{url}
+\usepackage[unicode,pdftex]{hyperref}
 \hypersetup{hidelinks}
+\hypersetup{breaklinks=true}
 
 \newcommand{\code}[1]{\texttt{#1}}
