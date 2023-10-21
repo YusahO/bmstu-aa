@@ -58,7 +58,7 @@ int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose
 \begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Левенштейна (часть 2)]
             else
             {
-                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
+                int cost = word1[j - 1] != word2[i - 1];
 
                 mat[i][j] = min(
                     mat[i - 1][j] + 1,
@@ -93,6 +93,7 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
     {
 \end{lstlisting}
 
+\clearpage
 \begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау~---~Левенштейна (часть 2)]
         for (int j = 0; j <= len1; ++j)
         {
@@ -106,7 +107,7 @@ int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verb
             }
             else
             {
-                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
+                int cost = word1[j - 1] != word2[i - 1];
 
                 mat[i][j] = min(
                     mat[i - 1][j] + 1,
@@ -141,7 +142,7 @@ int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, in
     if (ind2 == 0)
         return ind1;
 
-    int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
+    int cost = word1[j - 1] != word2[i - 1];
 
     int res = min(
         DamLevRec(word1, word2, ind1, ind2 - 1) + 1,
@@ -167,7 +168,7 @@ static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &wor
     if (memo[ind2][ind1] != -1)
         return memo[ind2][ind1];
     
-    int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
+    int cost = word1[j - 1] != word2[i - 1];
 \end{lstlisting}
 
 \begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (реализация) (часть 2)]
