@@ -20,7 +20,7 @@ def output_nonrec(x, *y):
     splt.plot(x, np.divide(y[1], 1000), color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
     splt.grid(True)
     plt.xlabel('Длина (симв.)')
-    plt.ylabel('Время (мс)')
+    plt.ylabel('Время (мкс)')
     splt.legend()
     plt.savefig('report/images/nonrec.svg')
 
