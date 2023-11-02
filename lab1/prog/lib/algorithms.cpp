@@ -129,7 +129,7 @@ static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &wor
 
     if (memo[ind2][ind1] != -1)
         return memo[ind2][ind1];
-    
+
     int cost = (word1[ind1 - 1] == word2[ind2 - 1]) ? 0 : 1;
 
     int res = min(
@@ -153,9 +153,9 @@ int DamLevRecCache(const std::wstring &word1, const std::wstring &word2)
     int **memo = Matrix::Allocate(len2 + 1, len1 + 1, -1);
     if (!memo)
         return -1;
-    
+
     int res = DamLevRecCacheImpl(word1, word2, len1, len2, memo);
-    
+
     Matrix::Free(memo, len2 + 1);
     return res;
 }
