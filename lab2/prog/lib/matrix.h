@@ -11,10 +11,11 @@ public:
     Matrix(int rows, int cols);
     Matrix(int rows, int cols, int val);
 
-    int rows() const { return m_Matrix.size(); }
-    int columns() const { return m_Matrix[0].size(); }
+    size_t rows() const { return m_Matrix.size(); }
+    size_t columns() const { return m_Matrix[0].size(); }
+    size_t size() const { return m_Matrix.size(); }
 
-    void FillRandom();
+    void FillRandom(int maxVal = 1000);
 
     static Matrix FromFile(const std::string &filename);
 

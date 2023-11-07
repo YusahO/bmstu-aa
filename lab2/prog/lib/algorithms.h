@@ -8,6 +8,6 @@
 namespace Multiply
 {
     Matrix Common(const Matrix &m1, const Matrix &m2);
-    Matrix Vinograd(const Matrix &m1, const Matrix &m2);
-    Matrix VinogradOpt(const Matrix &m1, const Matrix &m2);
+    Matrix Winograd(const Matrix &m1, const Matrix &m2);
+    Matrix WinogradOpt(const Matrix &m1, const Matrix &m2);
 };

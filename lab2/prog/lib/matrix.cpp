@@ -4,6 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 Matrix::Matrix(int rows, int cols)
     : m_Matrix(rows, std::vector<int>(cols))
@@ -18,11 +19,11 @@ Matrix::Matrix(int rows, int cols, int val)
         std::fill(row.begin(), row.end(), val);
 }
 
-void Matrix::FillRandom()
+void Matrix::FillRandom(int maxVal)
 {
-    for (auto &row : m_Matrix)
-        for (auto v : row)
-            v = std::rand() % 1000;
+    for (size_t i = 0; i < m_Matrix.size(); ++i)
+        for (size_t j = 0; j < m_Matrix[0].size(); ++j)
+            m_Matrix[i][j] = std::rand() % maxVal;
 }
 
 Matrix Matrix::FromFile(const std::string &filename)
@@ -54,11 +55,11 @@ Matrix Matrix::FromFile(const std::string &filename)
 std::ostream &operator<<(std::ostream &os, const Matrix &mat)
 {
     for (auto &row : mat.m_Matrix)
-    {
-        os << '\t';
+    {   
+        std::cout << "[ ";
         for (auto v : row)
-            os << v << " ";
-        os << std::endl;
+            os << std::right << std::setw(7) << v;
+        os << " ]" << std::endl;
     }
     return os;
 }
