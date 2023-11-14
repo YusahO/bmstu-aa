@@ -1,63 +1,14 @@
 \chapter{Конструкторская часть}
 
-В данном разделе будут приведены схемы алгоритмов нахождения расстояний Левенштейна и Дамерау~---~Левенштейна, описание используемых типов данных и структуры программного обеспечения.
-
-\section{Требования к программному обеспечению}
-
-К программе предъявлен ряд функциональных требований:
-
-\begin{itemize}
-    \item наличие интерфейса для выбора действий;
-    \item возможность ввода строк;
-    \item возможность обработки строк, состоящих как из латинских символов, так и из кириллических;
-    \item возможность произвести замеры процессорного времени работы реализованных алгоритмов поиска расстояний Левенштейна и Дамерау~---~Левенштейна.
-\end{itemize}
-
-\section{Требования вводу}
-
-\begin{enumerate}
-    \item На вход реализованным алгоритмам подаются две строки.
-    \item Строки могут включать как латинские, так и кириллические символы.
-    \item Буквы нижнего и верхнего регистра считаются разными символами.
-\end{enumerate}
+В данном разделе будут приведены схемы алгоритмов умножения матриц, описание используемых типов данных и структуры программного обеспечения.
 
 \section{Разработка алгоритмов}
 
-На рисунке \ref{fig:lev-iter} представлена схема матричного алгоритма поиска расстояния Левенштейна.
+% На рисунке \ref{fig:lev-iter} представлена схема классического алгоритма умножения матриц.
 
-На рисунке \ref{fig:dam-lev-iter} приведена схема матричной реализации алгоритма поиска расстояния Дамерау~---~Левенштейна.
+% На рисунке \ref{fig:dam-lev-iter} приведена схема умножения матриц алгоритмом Винограда.
 
-На рисунке \ref{fig:dam-lev-rec} представлена его рекурсивная реализация.
-
-На рисунке \ref{fig:dam-lev-rec-cache} показана рекурсивная реализация алгоритма нахождения расстояния Дамерау~---~Левенштейна с использованием матрицы-кэша.
-
-\begin{figure}[H]
-    \centering
-    \includesvg[width=1.0\textwidth]{images/lev-iter.svg}
-    \caption{Схема матричного алгоритма Левенштейна}
-    \label{fig:lev-iter}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includesvg[width=1.0\textwidth]{images/dam-lev-iter.svg}
-    \caption{Схема матричного алгоритма Дамерау~---~Левенштейна}
-    \label{fig:dam-lev-iter}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includesvg[width=0.65\textwidth]{images/dam-lev-rec.svg}
-    \caption{Схема рекурсивного алгоритма Дамерау~---~Левенштейна}
-    \label{fig:dam-lev-rec}
-\end{figure}
-
-\begin{figure}[H]
-    \centering
-    \includesvg[width=1.0\textwidth]{images/dam-lev-rec-cache.svg}
-    \caption{Схема рекурсивного алгоритма Дамерау~---~Левенштейна с использованием кэша}
-    \label{fig:dam-lev-rec-cache}
-\end{figure}
+% На рисунке \ref{fig:dam-lev-rec-cache} показана умножения матриц алгоритмом Штрассена.
 
 
 \section{Описание используемых типов данных}
@@ -65,13 +16,213 @@
 При реализации алгоритмов будут использованы следующие типы данных:
 
 \begin{itemize}
-    \item \textit{строка}~--- массив символов типа \texttt{wchar\_t};
-    \item \textit{длина строки}~--- значение длины строки типа \texttt{int};
     \item \textit{матрица}~--- двумерный массив значений типа \texttt{int}.
 \end{itemize}
+
+\section{Модель вычисления для проведения оценки трудоемкости}
+
+Введем модель вычислений, которая потребуется для определения трудоемкости каждого отдельного взятого алгоритма умножения матриц.
+
+\begin{enumerate}
+    \item Трудоемкость базовых операций имеет:
+    \begin{itemize}
+        \item значение 1 для операций:
+        \begin{equation}
+            \begin{gathered}
+                +, -, =, +=, -=, ==, !=, <, >, <=, >=, \\ 
+                \text{[]}, ++, --, \&\&, ||, >>, <<, \&, |
+            \end{gathered}
+        \end{equation}
+        \item значение 2 для операций:
+        \begin{equation}
+            *, /, \%, *=, /=, \%=.
+        \end{equation}
+    \end{itemize}
+    \item Трудоемкость условного оператора:
+    \begin{equation}
+        f_{\text{if}} =
+        \begin{cases}
+            \min({f_1, f_2}), & \text{лучший случай} \\
+            \max({f_1, f_2}), & \text{худший случай}.
+        \end{cases}
+    \end{equation}
+    \item Трудоемкость цикла
+    \begin{equation}
+        \begin{gathered}
+            f_{\text{for}} = f_{\text{инициализация}} + f_{\text{сравнение}} + \\
+            + M_{\text{итераций}} \cdot (f_{\text{тело}} + f_{\text{инкремент}} + f_{\text{сравнение}}).
+        \end{gathered} 
+    \end{equation}
+    \item Трудоемкость передачи параметра в функцию и возврат из нее равен 0.
+\end{enumerate}
+
+\section{Трудоемкость алгоритмов}
+
+Далее будут приведены рассчеты трудоемкости реализуемых алгоритмов умножения матриц.
+
+Пусть имеется две матрицы:
+
+\begin{enumerate}
+    \item $A$ размером $M \times N$,
+    \item $B$ размером $N \times P$.
+\end{enumerate}
+
+\subsection{Классический алгоритм}
+
+Для стандартного алгоритма умножения матриц трудоемкость будет составлена из:
+
+\begin{itemize}
+    \item цикла по $i \in [1 \ldots M]$, трудоемкость которого $f = 2 + M \cdot (2 + f_\text{тело})$;
+    \item цикла по $j \in [1 \ldots P]$, трудоемкость которого $f = 2 + P \cdot (2 + f_\text{тело})$;
+    \item цикла по $k \in [1 \ldots N]$, трудоемкость которого $f = 2 + N \cdot (2 + 12)$;
+\end{itemize}
+
+Поскольку трудоемкость стандартного алгоритма равна трудоемкости внешнего цикла, то
+
+\begin{equation}
+    \begin{gathered}
+        f_\text{Standard} = 2 + M \cdot (2 + 2 + P \cdot (2 + 2 + N \cdot (3 + 3 + (2 + 2 + 2)))) = \\
+        = 2 + 4M + 4MN + 14MNP \approx 14MNP = O(N^3)
+    \end{gathered}
+\end{equation}
+
+\subsection{Алгоритм Винограда}
+
+Трудоемкость алгоритма Винограда складывается из:
+\begin{itemize}
+    \item трудоемкости создания и инициализации массивов $RowFactors$ и $ColFactors$:
+    \begin{equation}
+        \label{eqn:f-arrs}
+        f_\text{arrs} = f_\text{RowFactors} + f_\text{ColFactors}
+    \end{equation}
+    \item трудоемкость заполнения массива $RowFactors$:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{RowFactors} = 2 + M \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
+            2 + 6M + \frac{19MN}{2};
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость заполнения массива $ColFactors$:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{ColFactors} = 2 + P \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
+            2 + 6P + \frac{19NP}{2};
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость цикла заполнения массивов для четных размеров:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{fill} = 2 + M \cdot (4 + P \cdot (13 + 32\frac{N}{2})) = 2 + 4M + \\
+            + 13MP + \frac{32MNP}{2} = 2 + 4M + 13MP + 16MNP;
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость цикла, выполняемого в случае нечетных размеров матрицы:
+    \begin{equation}
+        f_\text{oddLoop} = 3 + 
+        \begin{cases}
+            0, & \text{четная} \\
+            2 + M \cdot (4 + P \cdot (2 + 14)), & \text{иначе.}
+        \end{cases}
+    \end{equation}
+\end{itemize}
+Таким образом, для нечетного размера матрицы имеем:
+\begin{multline}
+    f_\text{odd} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx 16MNP = O(N^3);
+\end{multline}
+для четного:
+\begin{multline}
+    f_\text{even} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx 16MNP = O(N^3).
+\end{multline}
+
+\subsection{Оптимизированный алгоритм Винограда}
+
+Оптимизация алгоритма Винограда осуществляется следующим образом:
+\begin{itemize}
+    \item операция $x = x + k$ заменяется на операцию $x += k$;
+    \item операция $x \cdot 2$ заменяется на $x << 1$;
+    \item некоторые значения для алгоритма вычисляются заранее.
+\end{itemize}
+
+Тогда трудоемкость алгоритма Винограда складывается из:
+\begin{itemize}
+    \item трудоемкости предвычисления значения $\frac{N}{2}$, равной 3;
+    \item трудоемкости $f_\text{arrs}$ (\ref{eqn:f-arrs}) создания и инициализации массивов $RowFactors$ и $ColFactors$;
+    \item трудоемкость заполнения массива $RowFactors$:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{RowFactors} = 2 + M \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 5 + 1 + 2 + 3)) = \\
+            2 + 2M + \frac{13MN}{2};
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость заполнения массива $ColFactors$:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{ColFactors} = 2 + P \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 5 + 1 + 2 + 3)) = \\
+            2 + 2P + \frac{13NP}{2};
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость цикла заполнения массивов для четных размеров:
+    \begin{equation}
+        \begin{gathered}
+            f_\text{fill} = 2 + M \cdot (4 + P \cdot (2 + 10 + 2 + 19\frac{N}{2})) = 2 + 4M + \\
+            + 13MP + \frac{32MNP}{2} = 2 + 4M + 14MP + \frac{19MNP}{2};
+        \end{gathered}
+    \end{equation}
+    \item трудоемкость цикла, выполняемого в случае нечетных размеров матрицы:
+    \begin{equation}
+        f_\text{oddLoop} = 3 + 
+        \begin{cases}
+            0, & \text{четная} \\
+            2 + M \cdot (4 + P \cdot (2 + 11)), & \text{иначе.}
+        \end{cases}
+    \end{equation}
+\end{itemize}
+Таким образом, для нечетного размера матрицы имеем:
+\begin{multline}
+    f_\text{odd} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3);
+\end{multline}
+для четного:
+\begin{multline}
+    f_\text{even} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3).
+\end{multline}
+
+\subsection{Алгоритм Штрассена}
+
+Пусть матрицы $A$ и $B$ имеют размер $n \times n$, где $n$~--- степень 2.
+
+Если $M(n)$~---  количество умножений, выполняемых алгоритмом Штрассена для умножения двух матриц размером $n \times n$, то рекуррентное соотношение для $M(n)$ будет иметь следующий вид~\cite{strassen-elib}:
+
+\begin{equation}
+    M(n) = 7M \left (\frac{n}{2} \right ), n > 1, M(1) = 1.
+\end{equation}
+Поскольку $n = 2^k$:
+\begin{equation}
+    \begin{gathered}
+        M(2^k) = 7M(2^{k - 1}) = 7 \cdot [7M(2^{k - 2})] = 7^2 \cdot M(2^{k-2}) = \ldots = \\
+        = 7^i \cdot M(2^{k-i}) = \ldots = 7^k \cdot M(2^{k-k}) = 7^k.
+    \end{gathered}
+\end{equation}
+Так как $k = \log_2{(n)}$:
+\begin{equation}
+    M(n) = 7^{\log_2{(7)}} = n^{\log_2{(7)}} \approx n^{2.807}.
+\end{equation}
+
+Рассмотрим количество сложений $A(n)$.
+Для умножения двух матриц порядка $n > 1$ алгоритму требуется 7 умножений и 18 сложений матриц размером $\frac{n}{2} \times \frac{n}{2}$~\cite{strassen-elib}; при $n > 1$ сложений не требуется, так как задача вырождается в перемножение двух чисел, поэтому количество сложений оценивается следующим образом:
+
+\begin{equation}
+    A(n) = 7 \cdot A \left ( \frac{n}{2} \right ) + 18 \cdot \left ( \frac{n}{2} \right )^2, n > 1, A(1) = 0.
+\end{equation}
+
+Итоговая трудоемкость рассчитывается как:
+
+\begin{equation}
+    T(n) = A(n) + M(n).
+\end{equation}
 
 \section*{Вывод}
 \addcontentsline{toc}{section}{Вывод}
 
-В данном разделе на основе теоретических данных были перечислены требования к ПО.
-Также были построены схемы реализуемых алгоритмов на основе данных, полученных на этапе анализа.
+В данном разделе на основе теоретических данных были построены схемы реализуемых алгоритмов умножения матриц.
+Также была проведена оценка трудоемкостей алгоритмов.
+В результате оценки алгоритма Винограда выяснилось, что оптимизированная версия в 1.6 раз менее трудоемка, чем неоптимизированная.

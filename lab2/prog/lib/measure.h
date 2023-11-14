@@ -3,10 +3,6 @@
 #include "algorithms.h"
 #include <ctime>
 
-// std::wstring GenerateWord(unsigned long len);
+double MeasureCPUTime(const Matrix &m1, const Matrix &m2, MatMulFunc fn);
 
-// double MeasureCPUTime(const std::wstring &word1, const std::wstring &word2, NonRecursiveFunc fn);
-// double MeasureCPUTime(const std::wstring &word1, const std::wstring &word2, RecursiveFunc fn);
-// double MeasureCPUTime(const std::wstring &word1, const std::wstring &word2, RecursiveCacheFunc fn);
-
-// void TimeMeasure(int maxLen, int iters);
+void TimeMeasure(int start, int maxLen, int iters);

@@ -12,3 +12,5 @@
 *.synctex.gz
 **svg-inkscape**
 **venv**
+*.bkp
+*.dtmp

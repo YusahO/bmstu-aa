@@ -13,55 +13,70 @@ def parse_table(path):
                 data.append(numbers) 
     return data
 
-def output_nonrec(x, *y):
+def output_odd(x, *y):
     fig = plt.figure(figsize=(10, 7))
     splt = fig.add_subplot()
-    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Левенштейна')
-    splt.plot(x, np.divide(y[1], 1000), color='b', marker='*', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
+    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Классический алгоритм')
+    splt.plot(x, y[1], color='g', marker='*', label='Алгоритм Винограда')
+    splt.plot(x, y[2], color='b', marker='s', linestyle='-.', label='Алгоритм Винограда (оптимизир.)')
+    splt.grid(True)
+    plt.xlabel('Длина (симв.)')
+    plt.ylabel('Время (нс)')
+    splt.legend()
+    plt.savefig('report/images/time/all_odd.svg')
+
+def output_even(x, *y):
+    fig = plt.figure(figsize=(10, 7))
+    splt = fig.add_subplot()
+    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Классический алгоритм')
+    splt.plot(x, y[1], color='g', marker='*', label='Алгоритм Винограда')
+    splt.plot(x, y[2], color='b', marker='s', linestyle='-.', label='Алгоритм Винограда (оптимизир.)')
+    splt.grid(True)
+    plt.xlabel('Длина (симв.)')
+    plt.ylabel('Время (нс)')
+    splt.legend()
+    plt.savefig('report/images/time/all_even.svg')
+
+def output_strassen(x, *y):
+    fig = plt.figure(figsize=(10, 7))
+    splt = fig.add_subplot()
+    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Классический алгоритм')
+    splt.plot(x, np.divide(y[1], 1000), color='b', marker='^', label='Алгоритм Винограда')
+    splt.plot(x, np.divide(y[2], 1000), color='orange', marker='s', linestyle='-.', label='Алгоритм Винограда (оптимизир.)')
+    splt.plot(x, np.divide(y[3], 1000), color='g', marker='>', linestyle='--', label='Алгоритм Штрассена')
+    splt.set_yscale('log')
     splt.grid(True)
     plt.xlabel('Длина (симв.)')
     plt.ylabel('Время (мкс)')
     splt.legend()
-    plt.savefig('report/images/nonrec.svg')
-
-def output_rec(x, *y):
-    fig = plt.figure(figsize=(10, 7))
-    splt = fig.add_subplot()
-    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Рекурсивный алгоритм Дамерау-Левенштейна')
-    splt.plot(x, y[1], color='b', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
-    splt.set_yscale('log')
-    splt.grid(True)
-    plt.xlabel('Длина (симв.)')
-    plt.ylabel('Время (нс)')
-    splt.legend()
-    plt.savefig('report/images/rec.svg')
-
-def output_fastest(x, *y):
-    fig = plt.figure(figsize=(10, 7))
-    splt = fig.add_subplot()
-    splt.plot(x, y[0], color='r', marker='o', linestyle=':', label='Нерекурсивный алгоритм Дамерау-Левенштейна')
-    splt.plot(x, y[1], color='g', marker='*', label='Рекурсивный алгоритм Дамерау-Левенштейна')
-    splt.plot(x, y[2], color='b', marker='s', linestyle='-.', label='Рекурсивный алгоритм Дамерау-Левенштейна с использованием кэша')
-    splt.set_yscale('log')
-    splt.grid(True)
-    plt.xlabel('Длина (симв.)')
-    plt.ylabel('Время (нс)')
-    splt.legend()
-    plt.savefig('report/images/dl_all.svg')
+    plt.savefig('report/images/time/strassen.svg')
 
 
 def main():
-    data = parse_table('graph/table.txt')
-
+    data = parse_table('graph/table_1.txt')
     iter_indices = list(int(iter[0]) for iter in data)
-    lev_iter = list(float(iter[1]) for iter in data)
-    damlev_iter = list(float(iter[2]) for iter in data)
-    damlev_rec = list(float(data[i][3]) for i, _ in enumerate(data) if i < 10)
-    damlev_rec_cached = list(float(data[i][4]) for i, _ in enumerate(data) if i < 10)
+    classic_odd = list(float(iter[1]) for iter in data)
+    winograd_odd = list(float(iter[2]) for iter in data)
+    winograd_odd_opt = list(float(iter[3]) for iter in data)
 
-    output_nonrec(iter_indices, lev_iter, damlev_iter)
-    output_rec(iter_indices[:10], damlev_rec, damlev_rec_cached[:10])
-    output_fastest(iter_indices[:10], damlev_iter[:10], damlev_rec[:10], damlev_rec_cached[:10])
+    output_odd(iter_indices, classic_odd, winograd_odd, winograd_odd_opt)
+
+    data = parse_table('graph/table_0.txt')
+    iter_indices = list(int(iter[0]) for iter in data)
+    classic_even = list(float(iter[1]) for iter in data)
+    winograd_even = list(float(iter[2]) for iter in data)
+    winograd_even_opt = list(float(iter[3]) for iter in data)
+
+    output_even(iter_indices, classic_even, winograd_even, winograd_even_opt)
+
+    data = parse_table('graph/table_2.txt')
+    iter_indices = list(int(iter[0]) for iter in data)
+    classic = list(float(iter[1]) for iter in data)
+    winograd = list(float(iter[2]) for iter in data)
+    winograd_opt = list(float(iter[3]) for iter in data)
+    strassen = list(float(iter[4]) for iter in data)
+
+    output_strassen(iter_indices, classic, winograd, winograd_opt, strassen)
 
     return 0
 

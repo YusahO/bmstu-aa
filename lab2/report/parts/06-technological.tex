@@ -2,9 +2,19 @@
 
 В данном разделе приведены средства реализации программного обеспечения, сведения о модулях программы, листинг кода и функциональные тесты.
 
+\section{Требования к ПО}
+
+К программе предъявлен ряд требований:
+
+\begin{itemize}
+    \item на вход программе подаются две матрицы, каждая записана в отдельном текстовом файле;
+    \item результатом умножения является матрица, выводимая на экран;
+    \item программа должна позволять производить измерения процессорного времени, затрачиваемого на выполнение реализуемых алгоритмов.
+\end{itemize}
+
 \section{Средства реализации}
 
-В качестве языка программирования, используемого при написании данной лабораторной работы, был выбран C++ \cite{cpp-lang}, так как в нем имеется контейнер \texttt{std::wstring}, представляющий собой массив символов \texttt{std::wchar\_t}, и библиотека \texttt{<ctime>} \cite{ctime}, позволяющая производить замеры процессорного времени.
+В качестве языка программирования, используемого при написании данной лабораторной работы, был выбран C++ \cite{cpp-lang}, так как в нем имеется контейнер \texttt{std::vector}, представляющий собой массив динамический массив данных произвольного типа, и библиотека \texttt{<ctime>} \cite{ctime}, позволяющая производить замеры процессорного времени.
 
 В качестве средства написания кода была выбрана кроссплатформенная среда разработки \textit{Visual Studio Code} за счет того, что она предоставляет функционал для проектирования, разработки и отладки ПО.
 
@@ -14,233 +24,448 @@
 
 \begin{itemize}
     \item \texttt{main.cpp}~--- файл, содержащий точку входа в программу;
-    \item \texttt{matrix.cpp}~--- файл, содержащий функции создания матрицы, ее освобождения и вывода на экран;
-    \item \texttt{algorithms.cpp}~--- файл, содержащий реализации алгоритмов поиска расстояний Левенштейна и Дамерау~---~Левенштейна;
+    \item \texttt{matrix.cpp}~--- файл, содержащий класс \texttt{Matrix}, реализующий необходимые для работы с матрицами функции;
+    \item \texttt{algorithms.cpp}~--- файл, содержащий реализации алгоритмов умножения матриц;
     \item \texttt{measure.cpp}~--- файл, содержащий функции, замеряющие процессорное время выполнения реализуемых алгоритмов.
 \end{itemize}
 
 \clearpage
 \section{Реализация алгоритмов}
 
-\begin{lstlisting}[caption={Функция \texttt{min}, используемая в реализациях алгоритмов}]
-template <typename T>
-static T min(T x, T y, T z)
+\begin{lstlisting}[label={lst:common}, caption={Реализация классического алгоритма умножения матриц}]
+Matrix Common(const Matrix &m1, const Matrix &m2)
 {
-    return std::min(x, std::min(y, z));
+    size_t rows1 = m1.rows();
+    size_t cols1 = m1.columns();
+    size_t cols2 = m2.columns();
+
+    Matrix res(rows1, cols2, 0);
+
+    for (size_t i = 0; i < rows1; ++i)
+        for (size_t j = 0; j < cols2; ++j)
+            for (size_t k = 0; k < cols1; ++k)
+                res[i][j] = res[i][j] + m1[i][k] * m2[k][j];
+
+    return res;
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Левенштейна (часть 1)]
-int LevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose)
+\begin{lstlisting}[label={lst:winograd}, caption={Реализация алгоритма Винограда}]
+Matrix Winograd(const Matrix &m1, const Matrix &m2)
 {
-    int len1 = word1.length();
-    int len2 = word2.length();
+    size_t rows1 = m1.rows();
+    size_t cols1 = m1.columns();
+    size_t cols2 = m2.columns();
 
-    int **mat = Matrix::Allocate(len2 + 1, len1 + 1);
-    if (!mat)
-        return -1;
+    Matrix res(rows1, rows1);
 
-    mat[0][0] = 0;
-    for (int i = 0; i <= len2; ++i)
+    std::vector<int> row_factors(rows1, 0);
+    std::vector<int> col_factors(cols2, 0);
+
+    for (size_t i = 0; i < rows1; ++i)
+        for (size_t j = 0; j < cols1 / 2; ++j)
+            row_factors[i] = row_factors[i] + m1[i][2 * j] * m1[i][2 * j + 1];
+
+    for (size_t i = 0; i < cols2; ++i)
+        for (size_t j = 0; j < cols1 / 2; ++j)
+            col_factors[i] = col_factors[i] + m2[2 * j][i] * m2[2 * j + 1][i];
+
+    for (size_t i = 0; i < rows1; ++i)
     {
-        for (int j = 0; j <= len1; ++j)
+        for (size_t j = 0; j < cols2; ++j)
         {
-            if (i == 0)
+            res[i][j] = -row_factors[i] - col_factors[j];
+            for (size_t k = 0; k < cols1 / 2; ++k)
             {
-                mat[i][j] = j;
-            }
-            else if (j == 0)
-            {
-                mat[i][j] = i;
-            }
-\end{lstlisting}
-
-\clearpage
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Левенштейна (часть 2)]
-            else
-            {
-                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
-
-                mat[i][j] = min(
-                    mat[i - 1][j] + 1,
-                    mat[i][j - 1] + 1,
-                    mat[i - 1][j - 1] + cost);
+                res[i][j] = res[i][j] + (m1[i][2 * k] + m2[2 * k + 1][j]) *
+                            (m1[i][2 * k + 1] + m2[2 * k][j]);
             }
         }
     }
 
-    if (verbose)
-        Matrix::Print(mat, word1, word2);
-
-    int res = mat[len2][len1];
-    Matrix::Free(mat, len2 + 1);
+    if (cols1 % 2)
+    {
+        for (size_t i = 0; i < rows1; ++i)
+            for (size_t j = 0; j < cols2; ++j)
+                res[i][j] = res[i][j] + m1[i][cols1 - 1] *
+                            m2[cols1 - 1][j];
+    }
 
     return res;
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау~---~Левенштейна (часть 1)]
-int DamLevNonRec(const std::wstring &word1, const std::wstring &word2, bool verbose)
+\begin{lstlisting}[label={lst:winograd-opt}, caption={Реализация алгоритма Винограда с оптимизациями}]
+Matrix WinogradOpt(const Matrix &m1, const Matrix &m2)
 {
-    int len1 = word1.length();
-    int len2 = word2.length();
+    size_t rows1 = m1.rows();
+    size_t cols1 = m1.columns();
+    size_t cols2 = m2.columns();
 
-    int **mat = Matrix::Allocate(len2 + 1, len1 + 1);
-    if (!mat)
-        return -1;
+    Matrix res(rows1, rows1);
 
-    mat[0][0] = 0;
-    for (int i = 0; i <= len2; ++i)
+    std::vector<int> row_factors(rows1, 0);
+    std::vector<int> col_factors(cols2, 0);
+
+    size_t half_cols1 = cols1 / 2;
+
+    for (size_t i = 0; i < rows1; ++i)
+        for (size_t j = 0; j < half_cols1; ++j)
+            row_factors[i] += m1[i][j << 1] * m1[i][(j << 1) + 1];
+
+    for (size_t i = 0; i < cols2; ++i)
+        for (size_t j = 0; j < half_cols1; ++j)
+            col_factors[i] += m2[j << 1][i] * m2[(j << 1) + 1][i];
+
+    for (size_t i = 0; i < rows1; ++i)
     {
-\end{lstlisting}
-
-\clearpage
-\begin{lstlisting}[caption=Матричный алгоритм поиска расстояния Дамерау~---~Левенштейна (часть 2)]
-        for (int j = 0; j <= len1; ++j)
+        for (size_t j = 0; j < cols2; ++j)
         {
-            if (i == 0)
+            res[i][j] = -row_factors[i] - col_factors[j];
+            for (size_t k = 0; k < half_cols1; ++k)
             {
-                mat[i][j] = j;
-            }
-            else if (j == 0)
-            {
-                mat[i][j] = i;
-            }
-            else
-            {
-                int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
-
-                mat[i][j] = min(
-                    mat[i - 1][j] + 1,
-                    mat[i][j - 1] + 1,
-                    mat[i - 1][j - 1] + cost);
-
-                if (word1[j - 2] == word2[i - 1] && word1[j - 1] == word2[i - 2])
-                {
-                    mat[i][j] = std::min(
-                        mat[i][j],
-                        mat[i - 2][j - 2] + 1);
-                }
+                size_t k_shifted = k << 1;
+                res[i][j] += (m1[i][k_shifted] + m2[k_shifted + 1][j]) *
+                    (m1[i][k_shifted + 1] + m2[k_shifted][j]);
             }
         }
     }
 
-    if (verbose)
-        Matrix::Print(mat, word1, word2);
-
-    int res = mat[len2][len1];
-    Matrix::Free(mat, len2 + 1);
-
-    return res;
-}
-\end{lstlisting}
-
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна]
-int DamLevRec(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2)
-{
-    if (ind1 == 0)
-        return ind2;
-    if (ind2 == 0)
-        return ind1;
-
-    int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
-
-    int res = min(
-        DamLevRec(word1, word2, ind1, ind2 - 1) + 1,
-        DamLevRec(word1, word2, ind1 - 1, ind2) + 1,
-        DamLevRec(word1, word2, ind1 - 1, ind2 - 1) + cost);
-
-    if (ind1 > 1 && ind2 > 1 && word1[ind1 - 1] == word2[ind2 - 2] && word1[ind1 - 2] == word2[ind2 - 1])
-        res = std::min(res, DamLevRec(word1, word2, ind1 - 2, ind2 - 2) + 1);
+    if (cols1 % 2)
+    {
+        for (size_t i = 0; i < rows1; ++i)
+            for (size_t j = 0; j < cols2; ++j)
+                res[i][j] += m1[i][cols1 - 1] *
+                m2[cols1 - 1][j];
+    }
 
     return res;
 }
 \end{lstlisting}
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (реализация) (часть 1)]
-static int DamLevRecCacheImpl(const std::wstring &word1, const std::wstring &word2, int ind1, int ind2, int **memo)
+\begin{lstlisting}[label={lst:strassen}, caption={Реализация алгоритма Штрассена}]
+Matrix Strassen(const Matrix &m1, const Matrix &m2)
 {
-    if (ind1 == 0)
-        return ind2;
+    size_t n = m1.rows() / 2;
+    size_t rows = m1.rows();
 
-    if (ind2 == 0)
-        return ind1;
+    if (rows <= 2)
+    {
+        return Common(m1, m2);
+    }
 
-    if (memo[ind2][ind1] != -1)
-        return memo[ind2][ind1];
-    
-    int cost = (word1[j - 1] == word2[i - 1]) ? 0 : 1;
-\end{lstlisting}
+    auto a11 = m1.slice(0, n, 0, n);
+    auto a12 = m1.slice(0, n, n, rows);
+    auto a21 = m1.slice(n, rows, 0, n);
+    auto a22 = m1.slice(n, rows, n, rows);
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (реализация) (часть 2)]
-    int res = min(
-        DamLevRecCacheImpl(word1, word2, ind1, ind2 - 1, memo) + 1,
-        DamLevRecCacheImpl(word1, word2, ind1 - 1, ind2, memo) + 1,
-        DamLevRecCacheImpl(word1, word2, ind1 - 1, ind2 - 1, memo) + cost
-    );
+    auto b11 = m2.slice(0, n, 0, n);
+    auto b12 = m2.slice(0, n, n, rows);
+    auto b21 = m2.slice(n, rows, 0, n);
+    auto b22 = m2.slice(n, rows, n, rows);
 
-    if (ind1 > 1 && ind2 > 1 && word1[ind1 - 1] == word2[ind2 - 2] && word1[ind1 - 2] == word2[ind2 - 1])
-        res = std::min(res, DamLevRecCacheImpl(word1, word2, ind1 - 2, ind2 - 2, memo) + 1);
+    auto p1 = Strassen(a11 + a22, b11 + b22);
+    auto p2 = Strassen(a22, b21 - b11);
+    auto p3 = Strassen(a11 + a12, b22);
+    auto p4 = Strassen(a12 - a22, b21 + b22);
+    auto p5 = Strassen(a11, b12 - b22);
+    auto p6 = Strassen(a21 + a22, b11);
+    auto p7 = Strassen(a11 - a21, b11 + b12);
 
-    memo[ind2][ind1] = res;
-    return res;
-}
-\end{lstlisting}
+    auto c11 = p1 + p2 - p3 + p4;
+    auto c12 = p5 + p3;
+    auto c21 = p6 + p2;
+    auto c22 = p5 + p1 - p6 - p7;
 
-\begin{lstlisting}[caption=Рекурсивный алгоритм поиска расстояния Дамерау~---~Левенштейна с кэшированием (оберточная функция)]
-int DamLevRecCache(const std::wstring &word1, const std::wstring &word2)
-{
-    int len1 = word1.length();
-    int len2 = word2.length();
-
-    int **memo = Matrix::Allocate(len2 + 1, len1 + 1, -1);
-    if (!memo)
-        return -1;
-
-    int res = DamLevRecCacheImpl(word1, word2, len1, len2, memo);
-
-    Matrix::Free(memo, len2 + 1);
-    return res;
+    return Matrix::combine(c11, c12, c21, c22);
 }
 \end{lstlisting}
 
 \section{Функциональные тесты}
 
-\begin{filecontents*}{parts/func_tests.csv}
-а,б,1,1,1,1
-a,b,1,1,1,1
-r,r,0,0,0,0
-сердце,солнце,3,3,3,3
-стол,стул,1,1,1,1
-кот,ток,2,2,2,2
-кто,кот,2,1,1,1
-Вениамин,Венгрия,4,4,4,4
-стол,столы,1,1,1,1
-\end{filecontents*}
+На таблице \ref{tbl:func-tests-classic} представлены функциональные тесты стандартного алгоритма умножения матриц.
+
+На таблице \ref{tbl:func-tests-winograd} представлены функциональные тесты алгоритма Винограда.
+
+На таблице \ref{tbl:func-tests-strassen} показаны функциональные тесты алгоритма Штрассена.
+
 
 \begin{table}[H]
     \small
 	\begin{center}
-		\caption{Функциональные тесты}
-		\label{tbl:func_tests}
-        \begin{tabular}{|c|c|c|c|c|c|}
+		\caption{Функциональные тесты для классического алгоритма}
+		\label{tbl:func-tests-classic}  
+            \begin{tabular}{|c|c|c|c|}
             \hline
-            \multicolumn{2}{|c|}{\bfseries Входные данные}
-            & \multicolumn{4}{c|}{\bfseries Расстояние и алгоритм} \\ 
-            \hline 
-            &
-            & \multicolumn{1}{c|}{\bfseries Левенштейна} 
-            & \multicolumn{3}{c|}{\bfseries Дамерау~---~Левенштейна} \\ \cline{3-6}
-            
-            \bfseries Строка 1 & \bfseries Строка 2 & \bfseries Итеративный & \bfseries Итеративный
-            
-            & \multicolumn{2}{c|}{\bfseries Рекурсивный} \\ \cline{5-6}
-            & & & & \bfseries Без кэша & \bfseries С кэшем
+            \textbf{Матрица 1} & \textbf{Матрица 2} & \textbf{Ожидаемый результат} & \textbf{Фактический результат} \\
+            \hline
+            $\begin{pmatrix}
+                9 
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                1 \\ 2 \\ 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6 \\
+                8 & 10 & 12 \\
+                12 & 15 & 18
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6 \\
+                8 & 10 & 12 \\
+                12 & 15 & 18
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                1 & 0 \\
+                0 & 1
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 0 & 0 \\
+                0 & 2 & 0 \\
+                0 & 0 & 1                
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                8 & 4 & 9 \\
+                2 & 6 & 1 \\
+                0 & 10 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                8 & 4 & 9 \\
+                2 & 6 & 1 \\
+                0 & 10 & 3
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                &
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                1 & 2 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+        \end{tabular}
+	\end{center}
+\end{table}
 
-            \csvreader[separator=comma]{parts/func_tests.csv}{}{% 
-                \\ \hline \csvcoli & \csvcolii & \csvcoliii & \csvcoliv & \csvcolv & \csvcolvi
-            }
-            \\ \hline
+
+\begin{table}[H]
+    \small
+	\begin{center}
+		\caption{Функциональные тесты для алгоритма Винограда}
+		\label{tbl:func-tests-winograd}  
+            \begin{tabular}{|c|c|c|c|}
+            \hline
+            \textbf{Матрица 1} & \textbf{Матрица 2} & \textbf{Ожидаемый результат} & \textbf{Фактический результат} \\
+            \hline
+            $\begin{pmatrix}
+                9 
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                1 \\ 2 \\ 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                1 & 0 \\
+                0 & 1
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 0 & 0 \\
+                0 & 2 & 0 \\
+                0 & 0 & 1                
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                8 & 4 & 9 \\
+                2 & 6 & 1 \\
+                0 & 10 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                8 & 4 & 9 \\
+                2 & 6 & 1 \\
+                0 & 10 & 3
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                &
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                1 & 2 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+        \end{tabular}
+	\end{center}
+\end{table}
+
+\begin{table}[H]
+    \small
+	\begin{center}
+		\caption{Функциональные тесты для алгоритма Штрассена}
+		\label{tbl:func-tests-strassen}  
+            \begin{tabular}{|c|c|c|c|}
+            \hline
+            \textbf{Матрица 1} & \textbf{Матрица 2} & \textbf{Ожидаемый результат} & \textbf{Фактический результат} \\
+            \hline
+            $\begin{pmatrix}
+                9 
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                27
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                1 \\ 2 \\ 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                1 & 0 \\
+                0 & 1
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 10 \\
+                3 & 7
+            \end{pmatrix}$ \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                2 & 0 & 0 \\
+                0 & 2 & 0 \\
+                0 & 0 & 1                
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                4 & 2 & 9 \\
+                1 & 3 & 1 \\
+                0 & 5 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                &
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
+            $\begin{pmatrix}
+                1 & 2 & 3
+            \end{pmatrix}$ &
+            $\begin{pmatrix}
+                4 & 5 & 6
+            \end{pmatrix}$ &
+            \textit{Сообщение об ошибке} &
+            \textit{Сообщение об ошибке} \\
+            \hline
         \end{tabular}
 	\end{center}
 \end{table}
@@ -248,5 +473,5 @@ r,r,0,0,0,0
 \section*{Вывод}
 \addcontentsline{toc}{section}{Вывод}
 
-Были реализованы алгоритмы Левенштейна (итеративно) и Дамерау~---~Левенштейна (итеративно, рекурсивно, рекурсивно с кэшированием).
+Были реализованы алгоритмы умножения матриц (классический, алгоритм Винограда, алгоритм Штрассена).
 Проведено тестирование реализованных алгортимов.
