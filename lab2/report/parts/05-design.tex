@@ -2,14 +2,67 @@
 
 В данном разделе будут приведены схемы алгоритмов умножения матриц, описание используемых типов данных и структуры программного обеспечения.
 
+\section{Требования к ПО}
+
+К программе предъявлен ряд требований:
+
+\begin{itemize}
+    \item на вход программе подаются две матрицы, каждая записана в отдельном текстовом файле;
+    \item результатом умножения является матрица, выводимая на экран;
+    \item программа должна позволять производить измерения процессорного времени, затрачиваемого на выполнение реализуемых алгоритмов.
+\end{itemize}
+
 \section{Разработка алгоритмов}
 
-% На рисунке \ref{fig:lev-iter} представлена схема классического алгоритма умножения матриц.
+На рисунке \ref{fig:scheme-classic} представлена схема классического алгоритма умножения матриц.
 
-% На рисунке \ref{fig:dam-lev-iter} приведена схема умножения матриц алгоритмом Винограда.
+На рисунках \ref{fig:scheme-winograd-pt1} -- \ref{fig:scheme-winograd-pt2} приведена схема умножения матриц алгоритмом Винограда.
 
-% На рисунке \ref{fig:dam-lev-rec-cache} показана умножения матриц алгоритмом Штрассена.
+На рисунках \ref{fig:scheme-winograd-opt-pt1} -- \ref{fig:scheme-winograd-opt-pt2} показана схема умножения матриц оптимизированным алгоритмом Винограда.
 
+На рисунке \ref{fig:scheme-strassen} представлена схема алгоритма Штрассена.
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.8\textwidth]{images/scheme_classic.svg}
+    \caption{Схема классического алгоритма умножения матриц}
+    \label{fig:scheme-classic}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.5\textwidth]{images/scheme_winograd_pt1.svg}
+    \caption{Схема алгоритма Винограда}
+    \label{fig:scheme-winograd-pt1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.6\textwidth]{images/scheme_winograd_pt2.svg}
+    \caption{Схема алгоритма Винограда (продолжение)}
+    \label{fig:scheme-winograd-pt2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.5\textwidth]{images/scheme_winograd_opt_pt1.svg}
+    \caption{Схема оптимизированного алгоритма Винограда}
+    \label{fig:scheme-winograd-opt-pt1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.6\textwidth]{images/scheme_winograd_opt_pt2.svg}
+    \caption{Схема оптимизированного алгоритма Винограда (продолжение)}
+    \label{fig:scheme-winograd-opt-pt2}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includesvg[width=0.5\textwidth]{images/scheme_strassen.svg}
+    \caption{Схема алгоритма Штрассена}
+    \label{fig:scheme-strassen}
+\end{figure}
 
 \section{Описание используемых типов данных}
 
@@ -81,7 +134,7 @@
 
 \begin{equation}
     \begin{gathered}
-        f_\text{Standard} = 2 + M \cdot (2 + 2 + P \cdot (2 + 2 + N \cdot (3 + 3 + (2 + 2 + 2)))) = \\
+        f_{Standard} = 2 + M \cdot (2 + 2 + P \cdot (2 + 2 + N \cdot (3 + 3 + (2 + 2 + 2)))) = \\
         = 2 + 4M + 4MN + 14MNP \approx 14MNP = O(N^3)
     \end{gathered}
 \end{equation}
@@ -93,32 +146,32 @@
     \item трудоемкости создания и инициализации массивов $RowFactors$ и $ColFactors$:
     \begin{equation}
         \label{eqn:f-arrs}
-        f_\text{arrs} = f_\text{RowFactors} + f_\text{ColFactors}
+        f_{arrs} = f_{RowFactors} + f_{ColFactors}
     \end{equation}
     \item трудоемкость заполнения массива $RowFactors$:
     \begin{equation}
         \begin{gathered}
-            f_\text{RowFactors} = 2 + M \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
+            f_{RowFactors} = 2 + M \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
             2 + 6M + \frac{19MN}{2};
         \end{gathered}
     \end{equation}
     \item трудоемкость заполнения массива $ColFactors$:
     \begin{equation}
         \begin{gathered}
-            f_\text{ColFactors} = 2 + P \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
+            f_{ColFactors} = 2 + P \cdot (2 + 4 + \frac{N}{2} \cdot (4 + 6 + 1 + 2 + 3 \cdot 2)) = \\
             2 + 6P + \frac{19NP}{2};
         \end{gathered}
     \end{equation}
-    \item трудоемкость цикла заполнения массивов для четных размеров:
+    \item трудоемкость цикла умножения для четных размеров:
     \begin{equation}
         \begin{gathered}
-            f_\text{fill} = 2 + M \cdot (4 + P \cdot (13 + 32\frac{N}{2})) = 2 + 4M + \\
+            f_{mul} = 2 + M \cdot (4 + P \cdot (13 + 32\frac{N}{2})) = 2 + 4M + \\
             + 13MP + \frac{32MNP}{2} = 2 + 4M + 13MP + 16MNP;
         \end{gathered}
     \end{equation}
     \item трудоемкость цикла, выполняемого в случае нечетных размеров матрицы:
     \begin{equation}
-        f_\text{oddLoop} = 3 + 
+        f_{oddLoop} = 3 + 
         \begin{cases}
             0, & \text{четная} \\
             2 + M \cdot (4 + P \cdot (2 + 14)), & \text{иначе.}
@@ -127,11 +180,11 @@
 \end{itemize}
 Таким образом, для нечетного размера матрицы имеем:
 \begin{multline}
-    f_\text{odd} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx 16MNP = O(N^3);
+    f_{odd} = f_{arrs} + f_{RowFactors} + f_{ColFactors} + f_{mul} + f_{oddLoop} \approx \\ \approx 16MNP = O(N^3);
 \end{multline}
 для четного:
 \begin{multline}
-    f_\text{even} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx 16MNP = O(N^3).
+    f_{even} = f_{arrs} + f_{RowFactors} + f_{ColFactors} + f_{mul} + f_{oddLoop} \approx \\ \approx 16MNP = O(N^3).
 \end{multline}
 
 \subsection{Оптимизированный алгоритм Винограда}
@@ -143,34 +196,34 @@
     \item некоторые значения для алгоритма вычисляются заранее.
 \end{itemize}
 
-Тогда трудоемкость алгоритма Винограда складывается из:
+Тогда трудоемкость алгоритма Винограда c примененными оптимизациями складывается из:
 \begin{itemize}
     \item трудоемкости предвычисления значения $\frac{N}{2}$, равной 3;
-    \item трудоемкости $f_\text{arrs}$ (\ref{eqn:f-arrs}) создания и инициализации массивов $RowFactors$ и $ColFactors$;
+    \item трудоемкости $f_{arrs}$ (\ref{eqn:f-arrs}) создания и инициализации массивов $RowFactors$ и $ColFactors$;
     \item трудоемкость заполнения массива $RowFactors$:
     \begin{equation}
         \begin{gathered}
-            f_\text{RowFactors} = 2 + M \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 5 + 1 + 2 + 3)) = \\
+            f_{RowFactors} = 2 + M \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 2 + 2 + 7)) = \\
             2 + 2M + \frac{13MN}{2};
         \end{gathered}
     \end{equation}
     \item трудоемкость заполнения массива $ColFactors$:
     \begin{equation}
         \begin{gathered}
-            f_\text{ColFactors} = 2 + P \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 5 + 1 + 2 + 3)) = \\
+            f_{ColFactors} = 2 + P \cdot (2 + 2 + \frac{N}{2} \cdot (2 + 2 + 2 + 7)) = \\
             2 + 2P + \frac{13NP}{2};
         \end{gathered}
     \end{equation}
-    \item трудоемкость цикла заполнения массивов для четных размеров:
+    \item трудоемкость цикла умножения для четных размеров:
     \begin{equation}
         \begin{gathered}
-            f_\text{fill} = 2 + M \cdot (4 + P \cdot (2 + 10 + 2 + 19\frac{N}{2})) = 2 + 4M + \\
-            + 13MP + \frac{32MNP}{2} = 2 + 4M + 14MP + \frac{19MNP}{2};
+            f_{mul} = 2 + M \cdot (4 + P \cdot (4 + 2 + \frac{N}{2} \cdot (2 + 2 + 3 + 6 + 2 + 6))) = \\
+            = 2 + 4M + 13MP + \frac{32MNP}{2} = 2 + 4M + 13MP + 16MNP;
         \end{gathered}
     \end{equation}
     \item трудоемкость цикла, выполняемого в случае нечетных размеров матрицы:
     \begin{equation}
-        f_\text{oddLoop} = 3 + 
+        f_{oddLoop} = 3 + 
         \begin{cases}
             0, & \text{четная} \\
             2 + M \cdot (4 + P \cdot (2 + 11)), & \text{иначе.}
@@ -179,11 +232,11 @@
 \end{itemize}
 Таким образом, для нечетного размера матрицы имеем:
 \begin{multline}
-    f_\text{odd} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3);
+    f_{odd} = f_{arrs} + f_{RowFactors} + f_{ColFactors} + f_{mul} + f_{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3);
 \end{multline}
 для четного:
 \begin{multline}
-    f_\text{even} = f_\text{arrs} + f_\text{RowFactors} + f_\text{ColFactors} + f_\text{fill} + f_\text{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3).
+    f_{even} = f_{arrs} + f_{RowFactors} + f_{ColFactors} + f_{mul} + f_{oddLoop} \approx \\ \approx \frac{19MNP}{2} = O(N^3).
 \end{multline}
 
 \subsection{Алгоритм Штрассена}

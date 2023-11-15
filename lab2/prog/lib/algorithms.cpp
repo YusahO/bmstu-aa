@@ -45,7 +45,7 @@ namespace Multiply
                 for (size_t k = 0; k < cols1 / 2; ++k)
                 {
                     res[i][j] = res[i][j] + (m1[i][2 * k] + m2[2 * k + 1][j]) *
-                                (m1[i][2 * k + 1] + m2[2 * k][j]);
+                        (m1[i][2 * k + 1] + m2[2 * k][j]);
                 }
             }
         }
@@ -55,7 +55,7 @@ namespace Multiply
             for (size_t i = 0; i < rows1; ++i)
                 for (size_t j = 0; j < cols2; ++j)
                     res[i][j] = res[i][j] + m1[i][cols1 - 1] *
-                                m2[cols1 - 1][j];
+                    m2[cols1 - 1][j];
         }
 
         return res;
@@ -75,12 +75,22 @@ namespace Multiply
         size_t half_cols1 = cols1 / 2;
 
         for (size_t i = 0; i < rows1; ++i)
+        {
             for (size_t j = 0; j < half_cols1; ++j)
-                row_factors[i] += m1[i][j << 1] * m1[i][(j << 1) + 1];
+            {
+                size_t j_mul = j << 1;
+                row_factors[i] += m1[i][j_mul] * m1[i][j_mul + 1];
+            }
+        }
 
         for (size_t i = 0; i < cols2; ++i)
+        {
             for (size_t j = 0; j < half_cols1; ++j)
-                col_factors[i] += m2[j << 1][i] * m2[(j << 1) + 1][i];
+            {
+                size_t j_mul = j << 1;
+                col_factors[i] += m2[j_mul][i] * m2[j_mul + 1][i];
+            }
+        }
 
         for (size_t i = 0; i < rows1; ++i)
         {
@@ -89,9 +99,9 @@ namespace Multiply
                 res[i][j] = -row_factors[i] - col_factors[j];
                 for (size_t k = 0; k < half_cols1; ++k)
                 {
-                    size_t k_shifted = k << 1;
-                    res[i][j] += (m1[i][k_shifted] + m2[k_shifted + 1][j]) *
-                        (m1[i][k_shifted + 1] + m2[k_shifted][j]);
+                    size_t k_mul = k << 1;
+                    res[i][j] += (m1[i][k_mul] + m2[k_mul + 1][j]) *
+                                 (m1[i][k_mul + 1] + m2[k_mul][j]);
                 }
             }
         }
@@ -100,8 +110,8 @@ namespace Multiply
         {
             for (size_t i = 0; i < rows1; ++i)
                 for (size_t j = 0; j < cols2; ++j)
-                    res[i][j] += m1[i][cols1 - 1] *
-                    m2[cols1 - 1][j];
+                    res[i][j] += m1[i][cols1 - 1] * 
+                                 m2[cols1 - 1][j];
         }
 
         return res;
@@ -109,7 +119,6 @@ namespace Multiply
 
     Matrix Strassen(const Matrix &m1, const Matrix &m2)
     {
-        size_t n = m1.rows() / 2;
         size_t rows = m1.rows();
 
         if (rows <= 2)
@@ -117,6 +126,8 @@ namespace Multiply
             return Common(m1, m2);
         }
 
+        size_t n = m1.rows() / 2;
+        
         auto a11 = m1.slice(0, n, 0, n);
         auto a12 = m1.slice(0, n, n, rows);
         auto a21 = m1.slice(n, rows, 0, n);
