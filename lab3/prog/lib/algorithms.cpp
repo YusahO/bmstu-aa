@@ -16,14 +16,13 @@ namespace Sort
 {
     int PancakeSort(std::vector<int> &arr)
     {
-        int i, a, maxNumPos, moves = 0;
         if (arr.size() < 2)
             return 0;
 
-        for (i = arr.size(); i > 1; --i)
+        for (int i = arr.size(); i > 1; --i)
         {
-            maxNumPos = 0;
-            for (a = 0; a < i; ++a)
+            int maxNumPos = 0;
+            for (int a = 0; a < i; ++a)
             {
                 if (arr[a] > arr[maxNumPos])
                     maxNumPos = a;
@@ -35,10 +34,9 @@ namespace Sort
             if (maxNumPos >= 0)
             {
                 flip(arr, maxNumPos, i);
-                moves++;
             }
         }
-        return moves;
+        return 0;
     }
 
     void GnomeSort(std::vector<int> &arr)
