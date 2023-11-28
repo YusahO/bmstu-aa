@@ -43,7 +43,7 @@
 
 % Список литературы
 \makeatletter 
-\def\@biblabel#1{#1 } % Изменение нумерации списка использованных источников
+\def\@biblabel#1{#1. } % Изменение нумерации списка использованных источников
 \makeatother
 
 \frenchspacing
@@ -194,7 +194,9 @@
 \hypersetup{hidelinks}
 \hypersetup{breaklinks=true}
 
-\usepackage{algorithm}% http://ctan.org/pkg/algorithms
-\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
 
 \newcommand{\code}[1]{\texttt{#1}}

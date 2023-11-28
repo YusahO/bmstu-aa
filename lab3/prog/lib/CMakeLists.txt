@@ -1,5 +1,6 @@
 set(SOURCES
     algorithms.cpp
+    measure.cpp
 )
 
 add_library(lib STATIC ${SOURCES})

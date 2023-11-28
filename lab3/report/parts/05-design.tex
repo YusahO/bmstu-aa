@@ -58,36 +58,33 @@
 \end{algorithm}
 
 \begin{algorithm}[H]
-    \caption{Алгоритм быстрой сортировки}
+    \caption{Алгоритм быстрой сортировки (разбиение Хоара)}
     \label{alg:q-sort}
-    \text{\textbf{Вход}: ссылка на массив $arr$ индексы $st$ и $end$}\\
+    \text{\textbf{Вход}: ссылка на массив $arr$, индексы $st$ и $end$}\\
     \text{\textbf{Выход}: отсортированный массив $arr$}
 
     \begin{algorithmic}[1]
-        \Procedure{QSort}{$arr$, $st$, $end$}
-        \State $l\gets st$
-        \State $r\gets end$
-        \State $piv\gets arr[\frac{l + r}{2}]$
-        \While{$l\le r$}
-            \While{$arr[l] < piv$}
-                \State $l\gets l + 1$
-            \EndWhile
-            \While{$arr[l] < piv$}
-                \State $r\gets r - 1$
-            \EndWhile
-            \If{$l\le r$}
+        \Procedure{QSortHoare}{$arr$, $st$, $end$}
+        \If{$st\ge 0$ \textbf{and} $end\ge 0$ \textbf{and} $st < end$}
+            \State $l\gets st$
+            \State $r\gets end$
+            \State $piv\gets arr[\frac{l + r}{2}]$
+            \Loop
+                \Do
+                    \State $l\gets l + 1$
+                \doWhile{$arr[l] < piv$}
+                \Do
+                    \State $r\gets r - 1$
+                \doWhile{$arr[r] > piv$}
+                \If{$l < r$}
+                    \State \textbf{break}
+                \EndIf
                 \State $swap\gets arr[l]$
                 \State $arr[l]\gets arr[r]$
                 \State $arr[r]\gets swap$
-                \State $l\gets l + 1$
-                \State $r\gets r - 1$
-            \EndIf
-        \EndWhile
-        \If{$st < r$}
-            \State \Call{QSort}{$arr, st, r$}
-        \EndIf
-        \If{$end > l$}
-            \State \Call{QSort}{$arr, l, end$}
+            \EndLoop
+            \State \Call{QSortHoare}{$arr, st, r$}
+            \State \Call{QSortHoare}{$arr, r + 1, end$}
         \EndIf
         \EndProcedure
     \end{algorithmic}
@@ -175,77 +172,106 @@
 
 Трудоемкость блинной сортировки складывается из:
 \begin{itemize}
-    \item трудоемкости проверки вырожденного случая, равной 1;
-    \item трудоемкости цикла сортировки:
+    \item трудоемкости прохода по $N - 1$ элементам массива
     \begin{equation}
-        f_{PanSort} = 2 + N \cdot (2 + f_{FindMax} + f_{Flip}),
+        f_{mainPass} = 2 + (N - 1) \cdot (2 + f_{body} + f_{flip})
     \end{equation}
-    \item трудоемкости поиска позиции максимального элемента в подмассиве $A[0..i]$, $i = \overline{1, N}$
+    \item трудоемкости прохода по $N - 1$ элементам массива во внутреннем цикле
     \begin{equation}
-        \begin{gathered}
-            f_{FindMax} = 3 + \\ + M \cdot \left ( 2 +
-            \begin{cases}
-                1, & \text{$j$-й элемент больше максимального}\\
-                0, & \text{иначе}\\
-            \end{cases} \right ),
-        \end{gathered}
-    \end{equation}
-    где $M$~--- размер подмассива $A[1..i]$;
-    \item трудоемкости отражения элементов массива
-    \begin{equation}
-        f_{Flip} = 
+        f_{body} = 2 + (N - 1) \cdot \left (2 + 3 + 3 +
         \begin{cases}
-            2, & \text{макс. элемент последний в }A[0..i]\\
-            f_{FlipLoop}, & \text{иначе},
+            0, & \text{лучший случай} \\
+            1, & \text{худший случай}
+        \end{cases} \right )
+    \end{equation}
+    \item трудоемкости переворачивания элементов массива
+    \begin{equation}
+        f_{flip} = 3 + 
+        \begin{cases}
+            0, & \text{лучший случай} \\
+            2 + (N - 2) \cdot (2 + 7), & \text{худший случай}
         \end{cases}
     \end{equation}
-    где $f_{FlipLoop}$~--- трудоемкость цикла обмена элементами массива при его отражении;
-    \begin{equation}
-        f_{FlipLoop} = 2 + \frac{L}{2} \cdot (2 + 3 + 2),
-    \end{equation}
-    где $L$~--- количество элементов в массиве между максимальным в подмассиве $A[0..i]$ и $i$-м.
 \end{itemize}
 
-Таким образом, трудоемкость блинной сортировки равна
+Таким образом, трудоемкость блинной сортировки в худшем случае равна
 \begin{equation}
     \begin{gathered}
-        F_{PanSort} = 2 + 7N + 3MN + \frac{7NL}{2} \approx O(N^2)
+        f_{PanSortWorst} = 2 + (N - 1) \cdot (4 + 9(N - 1) + 5 + 9(N - 2)) = \\
+        = 18N^2 - 36N + 20 \approx O(N^2)
     \end{gathered}
+\end{equation}
+и в лучшем случае:
+\begin{equation}
+        f_{PanSortBest} = 2 + (N - 1) \cdot (4 + 8(N - 1) + 3) = 8N^2 - 9N + 3 \approx O(N^2)
 \end{equation}
 
 \section{Быстрая сортировка}
 
-Трудоемкость быстрой сортировки складывается из:
+Трудоемкость быстрой сортировки (с выбором среднего элемента в качестве опорного) складывается из:
+\begin{itemize}
+    \item трудоемкости прохода по $N$ элементам массива (или подмассива)
+    \begin{equation}
+        f_{body} = f_{split} \cdot (5 + 7 + N \cdot (4 + f_{swap}))
+    \end{equation}
+    \item трудоемкости перестановки элементов
+    \begin{equation}
+        f_{swap} = 1 + 
+        \begin{cases}
+            0, & \text{лучший случай}\\
+            2 + 3 + 2 + 2, & \text{худший случай}
+        \end{cases}
+    \end{equation}
+    \item трудоемкости разбиения массива
+    \begin{equation}
+        f_{split} = 
+        \begin{cases}
+            \log_2{N}, & \text{лучший случай} \\
+            N, & \text{худший случай}
+        \end{cases}
+    \end{equation}
+\end{itemize}
+
+Таким образом, трудоемкость быстрой сортировки в худшем случае равна
 \begin{equation}
-    \begin{gathered}
-        f_{QSort} = 7 + 1 \cdot N \cdot (2 + \frac{N}{2} + 2 + \frac{N}{2} + 1 + 9)
-    \end{gathered}
+    f_{QSortWorst} = N \cdot (12 + 14N) = 12N + 14N^2 \approx O(N^2)
+\end{equation}
+и в лучшем случае:
+\begin{equation}
+    f_{QSortBest} = \log_2{N} (12 + 5N) = 12\log_2{N} + 5N\log_2{N} \approx O(N\log_2{N})
 \end{equation}
 
 \section{Гномья сортировка}
 
 Трудоемкость гномьей сортировки складывается из:
 \begin{itemize}
-    \item трудоемкости начальной инициализации переменных: $2$;
-    \item трудоемкости цикла сортировки:
+    \item трудоемкости прохода по $N - 1$ элементам массива
     \begin{equation}
-        f_{GnomeSort} = N \cdot (1 + f_{Branch}),
+        f_{body} = 2 + 2 + (N - 1) \cdot (2 + f_{backward})
     \end{equation}
-    \item трудоемкости обработки случая, когда обнаружен элемент, нарушающий порядок
+    \item трудоемкости обратного прохода по $N$ элементам массива для выполнения их обмена
     \begin{equation}
-        f_{Branch} = 3 + 
+        f_{backward} = 6 +
         \begin{cases}
-            2, & \text{$i$-й элемент < $i$-го}\\
-            5 + 3 + 2 + 2, & \text{иначе}
+            1, & \text{лучший случай}\\
+            N \cdot (3 + 4 + 2 + 1), & \text{худший случай}
         \end{cases}
     \end{equation}
 \end{itemize}
 
-Таким образом, трудоемкость гномьей сортировки равна
+Таким образом, трудоемкость гномьей сортировки в худшем случае равна
 \begin{equation}
-    f_{GnomeSort} = 13N.
+    \begin{gathered}
+        f_{GnSortWorst} = 4 + (N - 1) \cdot (8 + 10N) = 10N^2 - 2N - 4 \approx O(N^2)
+    \end{gathered}
 \end{equation}
-На неупорядоченных данных алгоритм имеет асимптотическую сложность $O(n^2)$, а на данных, близких к упорядоченным~--- $O(n)$~\cite{gnome-complexity}.
+и в лучшем случае:
+\begin{equation}
+    f_{GnSortBest} = 4 + (N - 1) \cdot (8 + 1) = 9N - 5 \approx O(N)
+\end{equation}
 
 \section*{Вывод}
 \addcontentsline{toc}{section}{Вывод}
+
+В данном разделе на основе теоретических данных были построены схемы реализуемых алгоритмов сортировки.
+Также была проведена оценка трудоемкостей алгоритмов.

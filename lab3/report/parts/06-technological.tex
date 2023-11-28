@@ -21,6 +21,93 @@
 \clearpage
 \section{Реализация алгоритмов}
 
+На листинге \ref{lst:pancake-sort} представлена реализация алгоритма блинной сортировки.
+
+\begin{lstlisting}[caption={Реализация алгоритма блинной сортировки и вспомогательной функции \texttt{flip}}, label={lst:pancake-sort}]
+static void flip(std::vector<int> &arr, int m, int n)
+{
+    int swap, i;
+    for (i = m; i < --n; i++)
+    {
+        swap = arr[i];
+        arr[i] = arr[n];
+        arr[n] = swap;
+    }
+}
+void PancakeSort(std::vector<int> &arr)
+{
+    if (arr.size() < 2)
+        return;
+    for (int i = arr.size(); i > 1; --i)
+    {
+        int maxNumPos = 0;
+        for (int a = 0; a < i; ++a)
+            if (arr[a] > arr[maxNumPos])
+                maxNumPos = a;
+
+        if (maxNumPos == (i - 1))
+            continue;
+        if (maxNumPos >= 0)
+            flip(arr, maxNumPos, i);
+    }
+}
+\end{lstlisting}
+
+\clearpage
+\begin{lstlisting}[caption={Реализация алгоритма гномьей сортировки}, label={lst:gnome-sort}]
+void GnomeSort(std::vector<int> &arr)
+{
+    int i = 1, j = 2;
+    while (i < (int)arr.size())
+    {
+        if (arr[i - 1] < arr[i])
+        {
+            i = j++;
+        }
+        else
+        {
+            int swap = arr[i - 1];
+            arr[i - 1] = arr[i];
+            arr[i] = swap;
+            --i;
+            if (i == 0)
+                i = j++;
+        }
+    }
+}
+\end{lstlisting}   
+
+\begin{lstlisting}[caption={Реализация алгоритма быстрой сортировки}, label={lst:q-sort}]
+void QuickSort(std::vector<int> &arr, int start, int end)
+{
+    if (start < 0 || end < 0 || start >= end)
+        return;
+
+    int pivot = arr[start];
+    int l = start - 1, r = end + 1;
+    while (true)
+    {
+        do
+        {
+            ++l;
+        } while (arr[l] < pivot);
+        do
+        {
+            --r;
+        } while (arr[r] > pivot);
+
+        if (l >= r)
+            break;
+
+        int swap = arr[l];
+        arr[l] = arr[r];
+        arr[r] = swap;
+    }
+    QuickSort(arr, start, r);
+    QuickSort(arr, r + 1, end);
+}
+\end{lstlisting}
+
 \section*{Вывод}
 \addcontentsline{toc}{section}{Вывод}
 

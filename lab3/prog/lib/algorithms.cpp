@@ -14,12 +14,13 @@ static void flip(std::vector<int> &arr, int m, int n)
 
 namespace Sort
 {
-    int PancakeSort(std::vector<int> &arr)
+    void PancakeSort(std::vector<int> &arr)
     {
-        if (arr.size() < 2)
-            return 0;
+        const int length = arr.size();
+        if (length < 2)
+            return;
 
-        for (int i = arr.size(); i > 1; --i)
+        for (int i = length; i > 1; --i)
         {
             int maxNumPos = 0;
             for (int a = 0; a < i; ++a)
@@ -36,47 +37,56 @@ namespace Sort
                 flip(arr, maxNumPos, i);
             }
         }
-        return 0;
     }
 
     void GnomeSort(std::vector<int> &arr)
     {
-        int i = 1, j = 2;
-        while (i < (int)arr.size())
+        int i = 1;
+        const int length = (int)arr.size();
+        while (i < length)
         {
-            if (arr[i - 1] < arr[i])
+            if (i > 0 && arr[i - 1] > arr[i])
             {
-                i = j++;
+                int swap = arr[i - 1];
+                arr[i - 1] = arr[i];
+                arr[i] = swap;
+                --i;
             }
             else
             {
-                std::swap(arr[i - 1], arr[i]);
-                --i;
-                if (i == 0)
-                    i = j++;
+                ++i;
             }
         }
     }
 
     void QuickSort(std::vector<int> &arr, int start, int end)
     {
-        int l = start, r = end;
-        int piv = arr[(l + r) / 2];
-        while (l <= r)
+        if (start < 0 || end < 0 || start >= end)
+            return;
+
+        int pivot = arr[start];
+        int l = start - 1, r = end + 1;
+        
+        while (true)
         {
-            while (arr[l] < piv)
-                l++;
-            while (arr[r] > piv)
-                r--;
-            
-            if (l <= r)
-                std::swap(arr[l++], arr[r--]);
+            do
+            {
+                ++l;
+            } while (arr[l] < pivot);
+            do
+            {
+                --r;
+            } while (arr[r] > pivot);
+
+            if (l >= r)
+                break;
+
+            int swap = arr[l];
+            arr[l] = arr[r];
+            arr[r] = swap;
         }
 
-        if (start < r)
-            QuickSort(arr, start, r);
-        if (end > l)
-            QuickSort(arr, l, end);
+        QuickSort(arr, start, r);
+        QuickSort(arr, r + 1, end);
     }
-
 }
