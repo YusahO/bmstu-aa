@@ -196,7 +196,9 @@
 
 \usepackage{algpseudocode}
 \usepackage{algorithm}
-
 \algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
+\captionsetup[algorithm]{name=Листинг}
+
+\renewcommand{\thealgorithm}{\thechapter.\arabic{algorithm}}
 
 \newcommand{\code}[1]{\texttt{#1}}
