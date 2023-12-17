@@ -10,4 +10,4 @@
 //     Backward = 2
 // };
 
-void TimeMeasure(int start, int maxLen, int step, int iters);
+void TimeMeasure(int start, int maxLen, int iters);
