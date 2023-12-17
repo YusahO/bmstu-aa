@@ -1,33 +1,13 @@
-Order,Destination,Distance
-Blagodarnyy,Budonnovsk,70
-Blagodarnyy,Svetlograd,68
-Budonnovsk,Zelenokumsk,60
-Budonnovsk,Neftekumsk,73
-Zelenokumsk,Georgievsk,54
-Novopavlovsk,Georgievsk,29
-Novopavlovsk,Pyatigorsk,66
-Pyatigorsk,Georgievsk,46
-Pyatigorsk,Mineral'nyye Vody,25
-Pyatigorsk,Zheleznovodsk,21
-Pyatigorsk,Lermontov,12
-Pyatigorsk,Yessentuki,18
-Georgievsk,Mineral'nyye Vody,38
-Mineral'nyye Vody,Zheleznovodsk,18
-Mineral'nyye Vody,Nevinnomyssk,110
-Mineral'nyye Vody,Blagodarnyy,128
-Mineral'nyye Vody,Svetlograd,153
-Georgievsk,Zheleznovodsk,54
-Zheleznovodsk,Lermontov,19
-Zheleznovodsk,Yessentuki,25
-Yessentuki,Nevinnomyssk,125
-Blagodarnyy,Nevinnomyssk,176
-Nevinnomyssk,Stavropol,55
-Nevinnomyssk,Novoaleksandrovsk,138
-Novoaleksandrovsk,Izobil'nyy,49
-Izobil'nyy,Mikhaylovsk,46
-Izobil'nyy,Stavropol,53
-Stavropol,Mikhaylovsk,15
-Izobil'nyy,Svetlograd,126
-Izobil'nyy,Ipatovo,124
-Svetlograd,Mikhaylovsk,85
-Svetlograd,Ipatovo,53
+Москва,Великий Новгород,Тверь,Ярославль,Великий Устюг,Коломна,Нижний Новгород,Казань,Астрахань,Вологда
+-1,490,160,250,750,100,400,715,1270,410
+490,-1,330,515,880,590,800,1115,1760,700
+160,330,-1,255,740,265,500,820,1435,350
+250,515,255,-1,505,290,290,600,1370,180
+750,880,740,505,-1,770,510,575,1605,450
+100,590,265,290,770,-1,355,660,1170,465
+400,800,500,290,510,355,-1,325,1145,405
+715,1115,820,600,575,660,325,-1,1055,670
+1270,1760,1435,1370,1605,1170,1145,1055,-1,1530
+410,700,350,180,450,465,405,670,1530,-1
+
+

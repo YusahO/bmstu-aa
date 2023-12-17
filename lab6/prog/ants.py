@@ -1,109 +1,120 @@
-#!./venv/bin/python3
+import numpy as np
+from random import random
+from defines import MIN_PHEROMONE
 
-import random
-import networkx as nx
-import pandas as pd
-import matplotlib
-matplotlib.use('TkAgg')
-import matplotlib.pyplot as plt
+def calcQ(matrix, size):
+    q = 0
+    count = 0
+    for i in range(size):
+        for j in range(size):
+            if (i != j):
+                q += matrix[i][j]
+                count += 1
+    return q / count
 
-def load_city_graph(file_name):
-    return pd.read_csv(file_name)
-
-def visualize_graph(city_df: pd.DataFrame):
-    G = nx.from_pandas_edgelist(city_df, 'Destination', 'Order', edge_attr='Distance', create_using=nx.DiGraph())
-    pos = nx.kamada_kawai_layout(G, scale=2)
-    nx.draw(G, pos, with_labels=True, node_size=1500, node_color='lightblue', font_weight='bold', arrowsize=20)
-    labels = nx.get_edge_attributes(G,'Distance')
-    nx.draw_networkx_edge_labels(G,pos,edge_labels=labels)
-    plt.show()
-
-def dataframe_to_city_graph(df: pd.DataFrame):
-    city_graph = {}
-    for _, row in df.iterrows():
-        origin_city = row['Order']
-        destination_city = row['Destination']
-        distance = row['Distance']
-        if origin_city not in city_graph:
-            city_graph[origin_city] = {}
-        if destination_city not in city_graph:
-            city_graph[destination_city] = {}
-        city_graph[origin_city][destination_city] = distance
-        city_graph[destination_city][origin_city] = distance
-    return city_graph
-
-
-def initialize_pheromones(city_graph, initial_pheromone):
-    pheromones = {(city1, city2): initial_pheromone for city1 in city_graph for city2 in city_graph[city1]}
+def calcPheromones(size):
+    min_phero = 1
+    pheromones = [[min_phero for i in range(size)] for j in range(size)]
     return pheromones
 
-def move_ant(current_city, route, city_graph, pheromones):
-    available_cities = [city for city in city_graph[current_city] if city not in route]
-    if not available_cities:  
-        return route, 0
-    probabilities = []
-    total_pheromones = sum(pheromones[(current_city, city)] for city in available_cities)
-    if total_pheromones == 0:  
-        chosen_city = random.choice(available_cities)
-    else:
-        for city in available_cities:
-            probability = pheromones[(current_city, city)] / total_pheromones
-            probabilities.append(probability)
-        chosen_city = random.choices(available_cities, weights=probabilities)[0]
-    route.append(chosen_city)
-    return chosen_city, 1
 
-def update_pheromones(pheromones, routes, city_graph, evaporation_factor, elite_ants):
-    elite_routes = sorted(routes, key=lambda x: sum(city_graph[x[i]][x[i + 1]] for i in range(len(x) - 1)))[:elite_ants]
-    for route in elite_routes:
-        route_length = sum(city_graph[route[i]][route[i + 1]] for i in range(len(route) - 1))
-        for i in range(len(route) - 1):
-            pheromones[(route[i], route[i + 1])] += 2 / route_length
+def calcVisibility(matrix, size):
+    visibility = [[(1.0 / matrix[i][j] if (i != j) else 0) for j in range(size)] for i in range(size)]
+    return visibility
 
-    for edge in pheromones:
-        pheromones[edge] *= (1 - evaporation_factor)
-        for route in routes:
-            route_length = sum(city_graph[route[i]][route[i + 1]] for i in range(len(route) - 1))
-            for i in range(len(route) - 1):
-                pheromones[(route[i], route[i + 1])] += 1 / route_length
+
+def calcVisitedPlaces(route, ants):
+    visited = [list() for _ in range(ants)]
+    for ant in range(ants):
+        visited[ant].append(route[ant])
+    return visited
+
+
+def calcLength(matrix, route):
+    length = 0
+
+    for way_len in range(1, len(route)):
+        length += matrix[route[way_len - 1], route[way_len]]
+
+    return length
+
+
+def updatePheromones(matrix, places, visited, pheromones, q, k_evaporation):
+    ants = places
+
+    for i in range(places):
+        for j in range(places):
+            delta = 0
+            for ant in range(ants):
+                length = calcLength(matrix, visited[ant])
+                delta += q / length
+
+            pheromones[i][j] *= (1 - k_evaporation)
+            pheromones[i][j] += delta
+            if (pheromones[i][j] < MIN_PHEROMONE):
+                pheromones[i][j] = MIN_PHEROMONE
+
     return pheromones
 
-def aco_with_elite_ants(city_graph, n_iterations, n_ants, evaporation_factor, elite_ants):
-    pheromones = initialize_pheromones(city_graph, 1.0)
-    best_route = None
-    best_route_length = float('inf')
-    
-    for _ in range(n_iterations):
-        routes = []
-        for _ in range(n_ants):
-            current_city = random.choice(list(city_graph.keys()))
-            route = [current_city]
-            while len(route) < len(city_graph):
-                current_city, moved = move_ant(current_city, route, city_graph, pheromones)
-                if not moved:
-                    break
-            routes.append(route)
 
-        pheromones = update_pheromones(pheromones, routes, city_graph, evaporation_factor, elite_ants)
+def findWays(pheromones, visibility, visited, places, ant, alpha, beta):
+    pk = [0] * places
 
-        for route in routes:
-            route_length = sum(city_graph[route[i]][route[i + 1]] for i in range(len(route) - 1))
-            if route_length < best_route_length:
-                best_route_length = route_length
-                best_route = route
+    for place in range(places):
+        if place not in visited[ant]:
+            ant_place = visited[ant][-1]
+            pk[place] = pow(pheromones[ant_place][place], alpha) * \
+                pow(visibility[ant_place][place], beta)
+        else:
+            pk[place] = 0
 
-    return best_route
+    sum_pk = sum(pk)
 
-def main():
-    file_name = 'prog/cities.csv'
-    city_df = load_city_graph(file_name)
-    city_graph = dataframe_to_city_graph(city_df)
-    n_iterations = 10000
-    n_ants = 5
-    evaporation_factor = 0.5
-    elite_ants = 2
-    optimal_route = aco_with_elite_ants(city_graph, n_iterations, n_ants, evaporation_factor, elite_ants)
-    print(optimal_route)
+    for place in range(places):
+        pk[place] /= sum_pk
 
-if __name__ == "__main__":
-    main()
+    return pk
+
+
+# Следующий город
+#  0         pk[0]  pk[1]    pk[2]       pk[2]  1
+#  |----------|------|--------|---x--------|----|
+def chooseNextPlaceByPosibility(pk):
+    posibility = random()
+    choice = 0
+    chosenPlace = 0
+    while ((choice < posibility) and (chosenPlace < len(pk))):
+        choice += pk[chosenPlace]
+        chosenPlace += 1
+
+    return chosenPlace
+
+
+
+def antAlgorithm(matrix, places, alpha, beta, k_evaporation, days):
+    q = calcQ(matrix, places)
+    bestWay = []
+    minDist = float("inf")
+    pheromones = calcPheromones(places)
+    visibility = calcVisibility(matrix, places)
+    ants = places
+    for day in range(days):
+        route = np.arange(places)
+        visited = calcVisitedPlaces(route, ants)
+        for ant in range(ants):
+            while (len(visited[ant]) != ants):
+                pk = findWays(pheromones, visibility, visited, places, ant, alpha, beta)
+                chosenPlace = chooseNextPlaceByPosibility(pk)
+                visited[ant].append(chosenPlace - 1)
+
+            visited[ant].append(visited[ant][0])
+
+            curLength = calcLength(matrix, visited[ant])
+
+            if (curLength < minDist):
+                minDist = curLength
+                bestWay = visited[ant]
+
+        pheromones = updatePheromones(matrix, places, visited, pheromones, q, k_evaporation)
+
+    return minDist, bestWay
