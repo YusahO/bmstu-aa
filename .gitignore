@@ -1,5 +1,6 @@
 **.vscode**
 **build**
+**__pycache__**
 !build.sh
 *.aux
 *.bbl
@@ -14,3 +15,5 @@
 **venv**
 *.bkp
 *.dtmp
+*.run.xml
+*.bcf
