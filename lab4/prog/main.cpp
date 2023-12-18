@@ -9,7 +9,7 @@
 #include "utils.h"
 #include "measure.h"
 
-constexpr const char *s_Filename = "/home/daria/Документы/bmstu-aa/lab4/prog/data/points.txt";
+constexpr const char *s_Filename = "/home/daria/Документы/bmstu-AA/lab4/prog/data/points.txt";
 
 namespace std
 {
@@ -102,7 +102,8 @@ int main()
         }
         else if (choice == 3)
         {
-            TimeMeasure(1, 16 * 8, 10);
+            // TimeMeasureThreads(1, 16 * 8, 10);
+            TimeMeasureLength(10000, 70000, 10);
         }
     }
     return 0;

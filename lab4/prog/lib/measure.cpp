@@ -67,16 +67,16 @@ double MeasureCPUTime(
     return (double)(end - beg);
 }
 
-void PrintHeadTime()
+void PrintHead()
 {
-    std::cout << "╔═════════╤═══════════════════════════════╗\n";
-    std::cout << "║         │           Время(мкс)          ║\n";
-    std::cout << "║  К-во   ├───────────────┬───────────────╢\n";
-    std::cout << "║ потоков │ Однопоточная  │ Многопоточная ║\n";
-    std::cout << "╟─────────┼───────────────┼───────────────╢\n";
+    std::cout << "╔═════════╤════════╤═══════════════════════════════╗\n";
+    std::cout << "║         │        │           Время(мкс)          ║\n";
+    std::cout << "║  К-во   │ Размер ├───────────────┬───────────────╢\n";
+    std::cout << "║ потоков │        │ Однопоточная  │ Многопоточная ║\n";
+    std::cout << "╟─────────┼────────┼───────────────┼───────────────╢\n";
 }
 
-void TimeMeasure(int start, int maxLen, int iters)
+void TimeMeasureThreads(int start, int n_threads, int iters)
 {
     srandom(time(NULL));
 
@@ -84,13 +84,54 @@ void TimeMeasure(int start, int maxLen, int iters)
     constexpr const double m = 2.0;
     constexpr const int max_iters = 1000;
     constexpr const double conv_threshold = 1.0;
-    const Algo::point_vec_t data = GetRandomPointVec(10000);
+    constexpr const int N = 10000;
+    const Algo::point_vec_t data = GetRandomPointVec(N);
     const Algo::point_vec_t cluster_centers = GetRandomPointVec(k);
 
-
-    PrintHeadTime();
-    for (int i = start; i <= maxLen; i *= 2)
+    std::vector<long long> times(2, 0);
+    for (int i = 0; i < iters; ++i)
     {
+        Algo::point_vec_t loc_cluster_centers = cluster_centers;
+        Algo::membership_t membership(data.size(), std::vector<double>(k, 0.0));
+        times[0] += MeasureCPUTime(membership, loc_cluster_centers, data, m, conv_threshold, max_iters, Algo::c_means);
+    }
+    double times_0 = times[0] / (double)iters / 1000.0;
+
+    PrintHead();
+    for (int i = start; i <= n_threads; i *= 2)
+    {
+        times[1] = 0;
+        for (int j = 0; j < iters; ++j)
+        {
+            Algo::point_vec_t loc_cluster_centers = cluster_centers;
+            Algo::membership_t membership(data.size(), std::vector<double>(k, 0.0));
+            times[1] += MeasureCPUTime(membership, loc_cluster_centers, data, m, conv_threshold, max_iters, Algo::c_means_parallel, i);
+        }
+
+        double times_1 = times[1] / (double)iters / 1000.0;
+
+        std::cout << "║ " << std::setw(7) << i << " │ "
+            << std::setw(6) << N << " │ "
+            << std::fixed << std::setprecision(2) << std::setw(13) << times_0 << " │ "
+            << std::fixed << std::setprecision(2) << std::setw(13) << times_1 << " ║\n";
+    }
+    std::cout << "╚═════════╧════════╧═══════════════╧═══════════════╝\n";
+}
+
+void TimeMeasureLength(int start, int max_len, int iters)
+{
+    srandom(time(NULL));
+
+    constexpr const int k = 40;
+    constexpr const double m = 2.0;
+    constexpr const int max_iters = 1000;
+    constexpr const double conv_threshold = 1.0;
+    const Algo::point_vec_t cluster_centers = GetRandomPointVec(k);
+
+    PrintHead();
+    for (int i = start; i <= max_len; i += 10000)
+    {
+        const Algo::point_vec_t data = GetRandomPointVec(i);
         std::vector<long long> times(2, 0);
 
         for (int j = 0; j < iters; ++j)
@@ -103,7 +144,7 @@ void TimeMeasure(int start, int maxLen, int iters)
             {
                 Algo::point_vec_t loc_cluster_centers = cluster_centers;
                 Algo::membership_t membership(data.size(), std::vector<double>(k, 0.0));
-                times[1] += MeasureCPUTime(membership, loc_cluster_centers, data, m, conv_threshold, max_iters, Algo::c_means_parallel, i);
+                times[1] += MeasureCPUTime(membership, loc_cluster_centers, data, m, conv_threshold, max_iters, Algo::c_means_parallel, 1);
             }
         }
 
@@ -111,8 +152,9 @@ void TimeMeasure(int start, int maxLen, int iters)
         double times_1 = times[1] / (double)iters / 1000.0;
 
         std::cout << "║ " << std::setw(7) << i << " │ "
-                  << std::fixed << std::setprecision(2) << std::setw(13) << times_0 << " │ "
-                  << std::fixed << std::setprecision(2) << std::setw(13) << times_1 << " ║\n";
+            << std::setw(6) << i << " │ "
+            << std::fixed << std::setprecision(2) << std::setw(13) << times_0 << " │ "
+            << std::fixed << std::setprecision(2) << std::setw(13) << times_1 << " ║\n";
     }
-    std::cout << "╚═════════╧═══════════════╧═══════════════╝\n";
+    std::cout << "╚═════════╧════════╧═══════════════╧═══════════════╝\n";
 }
