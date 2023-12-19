@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from ants import antAlgorithm
+from ants import ant_algorithm
 from bruteforce import brute_force
 
 def get_coefficients():
@@ -25,8 +25,8 @@ def run_algs(matrix: np.ndarray):
     # print("    Минимальная длина пути = ", res[0], "\n    Путь: ", res[1])
 
     print("Муравьиный алгоритм")
-    coefs = get_coefficients()
-    res = antAlgorithm(matrix, mat_size, *coefs)
+    # coefs = get_coefficients()
+    res = ant_algorithm(matrix)
     print("    Минимальная длина пути = ", res[0], "\n    Путь: ", res[1])
 
 # if __name__ == '__main__':
