@@ -73,6 +73,7 @@
 		К-во потоков (шт.) & Размер (элем.) & Послед{.} & Парал{.} \\ \hline
 		\csvreader[
 			separator=comma,
+			head=false,
 			late after line = \\\hline
 		]{parts/threads.csv}{}{% 
 			\csvcoli & \csvcolii & \csvcoliii & \csvcoliv 
@@ -118,6 +119,7 @@
 		К-во потоков (шт.) & Размер (элем.) & Послед{.} & Парал{.} \\ \hline
 		\csvreader[
 			separator=comma,
+			head=false,
 			late after line = \\\hline
 		]{parts/lengths.csv}{}{% 
 			\csvcoli & \csvcolii & \csvcoliii & \csvcoliv 
