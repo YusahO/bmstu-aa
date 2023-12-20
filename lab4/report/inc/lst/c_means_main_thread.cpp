@@ -8,7 +8,6 @@ void c_means_parallel(
     double delta = conv_threshold + 1.0;
     while (iters < max_iters && delta > conv_threshold)
     {
-        std::vector<std::thread> threads;
         calc_membership(membership, data, cluster_centers, m, n_threads);
 
         auto old_cluster_centers = cluster_centers;

@@ -17,5 +17,8 @@ static void calc_membership(
             data_from, data_to, m);
     }
     for (auto &thr : threads)
-        thr.join();
+    {
+        if (thr.joinable())
+            thr.join();
+    }
 }

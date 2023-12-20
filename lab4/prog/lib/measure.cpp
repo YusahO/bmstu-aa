@@ -88,6 +88,7 @@ void TimeMeasureThreads(int start, int n_threads, int iters)
     const Algo::point_vec_t data = GetRandomPointVec(N);
     const Algo::point_vec_t cluster_centers = GetRandomPointVec(k);
 
+    PrintHead();
     std::vector<long long> times(2, 0);
     for (int i = 0; i < iters; ++i)
     {
@@ -97,7 +98,6 @@ void TimeMeasureThreads(int start, int n_threads, int iters)
     }
     double times_0 = times[0] / (double)iters / 1000.0;
 
-    PrintHead();
     for (int i = start; i <= n_threads; i *= 2)
     {
         times[1] = 0;
@@ -118,7 +118,7 @@ void TimeMeasureThreads(int start, int n_threads, int iters)
     std::cout << "╚═════════╧════════╧═══════════════╧═══════════════╝\n";
 }
 
-void TimeMeasureLength(int start, int max_len, int iters)
+void TimeMeasureLength(int start, int max_len, int step, int iters)
 {
     srandom(time(NULL));
 
@@ -129,7 +129,7 @@ void TimeMeasureLength(int start, int max_len, int iters)
     const Algo::point_vec_t cluster_centers = GetRandomPointVec(k);
 
     PrintHead();
-    for (int i = start; i <= max_len; i += 10000)
+    for (int i = start; i <= max_len; i += step)
     {
         const Algo::point_vec_t data = GetRandomPointVec(i);
         std::vector<long long> times(2, 0);
@@ -151,7 +151,7 @@ void TimeMeasureLength(int start, int max_len, int iters)
         double times_0 = times[0] / (double)iters / 1000.0;
         double times_1 = times[1] / (double)iters / 1000.0;
 
-        std::cout << "║ " << std::setw(7) << i << " │ "
+        std::cout << "║ " << std::setw(7) << 1 << " │ "
             << std::setw(6) << i << " │ "
             << std::fixed << std::setprecision(2) << std::setw(13) << times_0 << " │ "
             << std::fixed << std::setprecision(2) << std::setw(13) << times_1 << " ║\n";

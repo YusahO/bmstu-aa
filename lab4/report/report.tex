@@ -3,7 +3,15 @@
 \setlist[itemize]{label=---}
 \setlist[enumerate]{label=\arabic*)}
 \usepackage{relsize}
+\usepackage{csvsimple}
+
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+\usepackage{siunitx}
+
 \usepackage{tabularx}
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
 
 \bibliography{parts/biblio}
 

@@ -80,7 +80,7 @@ namespace Algo
             }
         }
     }
-    
+
     static void calc_membership(
         membership_t &membership,
         const point_vec_t &data, point_vec_t &cluster_centers, double m,
@@ -100,7 +100,10 @@ namespace Algo
                 data_from, data_to, m);
         }
         for (auto &thr : threads)
-            thr.join();
+        {
+            if (thr.joinable())
+                thr.join();
+        }
     }
 
     void c_means_parallel(

@@ -102,8 +102,8 @@ int main()
         }
         else if (choice == 3)
         {
-            // TimeMeasureThreads(1, 16 * 8, 10);
-            TimeMeasureLength(10000, 70000, 10);
+            // TimeMeasureThreads(1, 16 * 8, 20);
+            TimeMeasureLength(5000, 30000, 5000, 10);
         }
     }
     return 0;
