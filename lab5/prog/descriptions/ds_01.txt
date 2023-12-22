@@ -1,0 +1,4 @@
+1
+2
+/home/daria/Документы/bmstu-aa/lab5/prog/dataset_01/01.mid
+/home/daria/Документы/bmstu-aa/lab5/prog/dataset_01/02.mid
