@@ -1,4 +1,5 @@
 #include "pipeline.h"
+#include "measure.h"
 
 int menu()
 {
@@ -23,14 +24,22 @@ int main()
     {
         if (choice == 1)
         {
-            consequent();
+            int req_cnt = utils::get_request_count();
+            auto datasets = utils::pick_datasets(req_cnt);
+            std::tuple cls_params = utils::get_clust_params();
+            consequent(req_cnt, datasets, cls_params);
         }
         else if (choice == 2)
         {
-            concurrent();
+            int req_cnt = utils::get_request_count();
+            auto datasets = utils::pick_datasets(req_cnt);
+            std::tuple cls_params = utils::get_clust_params();
+            concurrent(req_cnt, datasets, cls_params);
         }
         else if (choice == 3)
         {
+            TimeMeasureFiles(5);
+            TimeMeasureRequests(5, 50, 5, 10);
         }
     }
     return 0;

@@ -1,9 +1,10 @@
-void consequent()
+void consequent(
+    int req_cnt,
+    const std::vector<std::string> &datasets,
+    std::tuple<int, double, double, int> cls_params,
+    bool verbose)
 {
-    int req_cnt = utils::get_request_count();
-    auto datasets = utils::pick_datasets(req_cnt);
-    auto [k, m, conv_threshold, max_iters] = utils::get_clust_params();
-
+    auto [k, m, conv_threshold, max_iters] = cls_params;
     std::vector<std::unique_ptr<stages_t>> pool;
     for (int i = 0; i < req_cnt; ++i)
     {
@@ -25,8 +26,9 @@ void consequent()
             s->clusterized.results.emplace_back(std::move(mshp), std::move(cc));
         }
         clock_gettime(CLOCK_REALTIME, &s->clusterized.op_end);
-        pool.emplace_back(s);
+        if (verbose)
+            pool.emplace_back(s);
     }
-    dump_pool(pool, "cons.txt");
+    if (verbose)
+        dump_pool(pool, "cons.txt");
 }
-

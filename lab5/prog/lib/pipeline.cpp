@@ -87,12 +87,13 @@ static void dump_pool(std::vector<std::unique_ptr<stages_t>> &pool, const std::s
     fout.close();
 }
 
-void consequent()
+void consequent(
+    int req_cnt,
+    const std::vector<std::string> &datasets,
+    std::tuple<int, double, double, int> cls_params,
+    bool verbose)
 {
-    int req_cnt = utils::get_request_count();
-    auto datasets = utils::pick_datasets(req_cnt);
-    auto [k, m, conv_threshold, max_iters] = utils::get_clust_params();
-
+    auto [k, m, conv_threshold, max_iters] = cls_params;
     std::vector<std::unique_ptr<stages_t>> pool;
     for (int i = 0; i < req_cnt; ++i)
     {
@@ -114,9 +115,11 @@ void consequent()
             s->clusterized.results.emplace_back(std::move(mshp), std::move(cc));
         }
         clock_gettime(CLOCK_REALTIME, &s->clusterized.op_end);
-        pool.emplace_back(s);
+        if (verbose)
+            pool.emplace_back(s);
     }
-    dump_pool(pool, "cons.txt");
+    if (verbose)
+        dump_pool(pool, "cons.txt");
 }
 
 static void service_01(
@@ -154,7 +157,8 @@ static void service_03(
     int req_cnt,
     std::tuple<int, double, double, int> cls_params,
     ts_queue<stages_t *> &q2,
-    std::vector<std::unique_ptr<stages_t>> &pool)
+    std::vector<std::unique_ptr<stages_t>> &pool,
+    bool verbose)
 {
     for (int i = 0; i < req_cnt; ++i)
     {
@@ -173,23 +177,24 @@ static void service_03(
     }
 }
 
-void concurrent()
+void concurrent(
+    int req_cnt,
+    const std::vector<std::string> &datasets,
+    std::tuple<int, double, double, int> cls_params,
+    bool verbose)
 {
-    int req_cnt = utils::get_request_count();
-    auto datasets = utils::pick_datasets(req_cnt);
-    std::tuple cls_params = utils::get_clust_params();
-
     std::vector<std::unique_ptr<stages_t>> pool;
     ts_queue<stages_t *> q1;
     ts_queue<stages_t *> q2;
 
     std::thread t_01(service_01, req_cnt, std::cref(datasets), std::ref(q1));
     std::thread t_02(service_02, req_cnt, std::ref(q1), std::ref(q2));
-    std::thread t_03(service_03, req_cnt, cls_params, std::ref(q2), std::ref(pool));
+    std::thread t_03(service_03, req_cnt, cls_params, std::ref(q2), std::ref(pool), verbose);
 
     t_01.join();
     t_02.join();
     t_03.join();
 
-    dump_pool(pool, "conc.txt");
+    if (verbose)
+        dump_pool(pool, "conc.txt");
 }

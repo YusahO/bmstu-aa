@@ -1,5 +1,6 @@
 set(SOURCES
     utils.cpp
+    measure.cpp
     pipeline.cpp
     algorithms.cpp
 

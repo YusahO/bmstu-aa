@@ -17,45 +17,43 @@ def parse_table(path):
     print(df.to_csv(index=False))
     return data
 
-def output_threads(x, *y, output_file='', scale='linear'):
+def output_queries(x, *y, output_file='', scale='linear'):
     fig = plt.figure(figsize=(10, 7))
     splt = fig.add_subplot()
-    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Однопоточная')
-    splt.plot(x, np.divide(y[1], 1000), color='b', marker='^', label='Многопоточная')
+    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Линейная')
+    splt.plot(x, np.divide(y[1], 1000), color='b', marker='^', label='Конвейерная')
     splt.set_yscale(scale)
     splt.grid(True)
-    plt.xticks(x, [2**i for i in range(8)])
-    plt.xlabel('К-во потоков (шт.)')
+    plt.xlabel('К-во заявок (шт.)')
     plt.ylabel('Время (мс)')
     splt.legend()
     plt.savefig(output_file)
 
-def output_lengths(x, *y, output_file='', scale='linear'):
+def output_files(x, *y, output_file='', scale='linear'):
     fig = plt.figure(figsize=(10, 7))
     splt = fig.add_subplot()
-    splt.plot(x, np.divide(y[0], 1e3), color='r', marker='o', linestyle=':', label='Однопоточная')
-    splt.plot(x, np.divide(y[1], 1e3), color='b', marker='^', label='Многопоточная')
+    splt.plot(x, np.divide(y[0], 1000), color='r', marker='o', linestyle=':', label='Линейная')
+    splt.plot(x, np.divide(y[1], 1000), color='b', marker='^', label='Конвейерная')
     splt.set_yscale(scale)
     splt.grid(True)
-    plt.xlabel('Размер (элем.)')
+    plt.xlabel('К-во файлов (шт.)')
     plt.ylabel('Время (мс)')
     splt.legend()
     plt.savefig(output_file)
 
 
 def main():
-    data = parse_table('graph/threads.txt')
-    #iter_indices = list(int(iter[0]) for iter in data)
-    iter_indices = list(range(8))
-    cons = list(float(iter[2]) for iter in data)
-    para = list(float(iter[3]) for iter in data)
-    output_threads(iter_indices, cons, para, scale='log', output_file='report/inc/img/time_threads.pdf')
+    data = parse_table('graph/table.txt')
+    iter_indices = list(float(iter[0]) for iter in data)
+    cons = list(float(iter[1]) for iter in data)
+    para = list(float(iter[2]) for iter in data)
+    output_queries(iter_indices, cons, para, scale='log', output_file='report/inc/img/time_queries.pdf')
 
-    data = parse_table('graph/lengths.txt')
-    iter_indices = list(int(iter[1]) for iter in data)
-    cons = list(float(iter[2]) for iter in data)
-    para = list(float(iter[3]) for iter in data)
-    output_lengths(iter_indices, cons, para, scale='log', output_file='report/inc/img/time_lengths.pdf')
+    data = parse_table('graph/table_files.txt')
+    iter_indices = list(float(iter[0]) for iter in data)
+    cons = list(float(iter[1]) for iter in data)
+    para = list(float(iter[2]) for iter in data)
+    output_files(iter_indices, cons, para, scale='log', output_file='report/inc/img/time_files.pdf')
 
     return 0
 

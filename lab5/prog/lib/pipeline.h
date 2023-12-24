@@ -20,6 +20,11 @@ namespace std
     }
 }
 
+using ProcFn = void (*)(int,
+                        const std::vector<std::string> &,
+                        std::tuple<int, double, double, int>,
+                        bool);
+
 struct stages_t
 {
     parsed_dataset_request parsed;
@@ -27,5 +32,12 @@ struct stages_t
     clusterized_request clusterized;
 };
 
-void consequent();
-void concurrent();
+void consequent(int req_cnt,
+                const std::vector<std::string> &datasets,
+                std::tuple<int, double, double, int> cls_params,
+                bool verbose = true);
+
+void concurrent(int req_cnt,
+                const std::vector<std::string> &datasets,
+                std::tuple<int, double, double, int> cls_params,
+                bool verbose = true);
