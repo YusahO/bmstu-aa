@@ -1,0 +1,30 @@
+\documentclass{bmstu}
+
+\setlist[itemize]{label=---}
+\setlist[enumerate]{label=\arabic*)}
+\usepackage{relsize}
+\usepackage{csvsimple}
+
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{.}{#1}}
+
+\usepackage{siunitx}
+
+\usepackage{tabularx}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+
+\bibliography{parts/biblio}
+
+\begin{document}
+
+    \include{parts/01-title}
+    \maketableofcontents
+    \include{parts/02-introduction}
+    \include{parts/03-analysis}
+    \include{parts/04-design}
+    \include{parts/05-implementation}
+    \include{parts/06-research}
+    \include{parts/07-conclusion}
+    \makebibliography
+
+\end{document}
