@@ -2,12 +2,27 @@ import numpy as np
 from random import random
 from defines import MIN_PHEROMONE
 
+def make_summer(matrix):
+    mat = np.copy(matrix)
+    mat[3][2] /= 2 
+    mat[2][3] *= 4
+    mat[0][5] /= 2
+    mat[5][0] *= 4
+    mat[3][6] /= 2
+    mat[6][3] *= 4
+    return mat
+
 def make_winter(matrix):
-    wmatrix = np.copy(matrix)
-    wmatrix[0][1] = 0
-    wmatrix[1][0] = 0
-    wmatrix[2][0] *= 2
-    return wmatrix
+    mat = np.copy(matrix)
+    mat[3][4] *= 10
+    mat[4][3] *= 10
+    mat[1][5] *= 10
+    mat[5][1] *= 10
+    mat[2][9] *= 10
+    mat[9][2] *= 10
+    mat[8][4] *= 10
+    mat[4][8] *= 10
+    return mat
 
 def calc_q(matrix, size):
     q = 0
@@ -110,7 +125,7 @@ def ant_algorithm(matrix, size, alpha, beta, k_evaporation, days, elite_ants, el
 
     elite_ant_paths = []
 
-    matrices = [matrix, make_winter(matrix)]
+    matrices = [make_summer(matrix), make_winter(matrix)]
     season = 0
 
     visibilities = [

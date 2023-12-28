@@ -32,7 +32,6 @@ def brute_force(matrix, size):
     best_dist = float("inf")
 
     for i in range(len(places_combs)):
-        # places_combs[i].append(places_combs[i][0])
         cur_dist = 0
         for j in range(size - 1):
             start = places_combs[i][j]
@@ -41,6 +40,6 @@ def brute_force(matrix, size):
 
         if (cur_dist < best_dist):
             best_dist = cur_dist
-            best_path = places_combs[i][1:]
+            best_path = places_combs[i]
     
     return best_dist, best_path

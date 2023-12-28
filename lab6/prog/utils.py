@@ -100,7 +100,7 @@ def get_coefficients():
         k_evaporation = float(input("    Введите коэффициент испарения: "))
         days = int(input("    Введите кол-во дней: "))
         elite_ants = int(input("    Введите количество элитных муравьев: "))
-        elite_deposite = int(input("    Введите коэффициент усиления феромонов элитных муравьев: "))
+        elite_deposite = float(input("    Введите коэффициент усиления феромонов элитных муравьев: "))
     except:
         print("    Введены недопустимые значения. Используются значения по умолчанию")
         alpha = 0
@@ -109,7 +109,7 @@ def get_coefficients():
         days = 180
         elite_ants = 5
         elite_deposite = 1.0
-    return alpha, beta, k_evaporation, days, elite_ants
+    return alpha, beta, k_evaporation, days, elite_ants, elite_deposite
 
 
 def run_ant_algorithm():

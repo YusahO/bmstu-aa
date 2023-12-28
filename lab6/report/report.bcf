@@ -3524,6 +3524,7 @@
     <bcf:citekey order="11" intorder="1">elite-ants-alg</bcf:citekey>
     <bcf:citekey order="12" intorder="1">python-lang</bcf:citekey>
     <bcf:citekey order="13" intorder="1">python-lang-time</bcf:citekey>
+    <bcf:citekey order="14" intorder="1">map</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="none">
