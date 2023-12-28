@@ -8,10 +8,10 @@
 \usepackage{dcolumn}
 \newcolumntype{d}[1]{D{.}{.}{#1}}
 
-\usepackage{siunitx}
-
-\usepackage{tabularx}
-\newcolumntype{R}{>{\raggedleft\arraybackslash}X}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\algdef{SE}[DOWHILE]{Do}{doWhile}{\algorithmicdo}[1]{\algorithmicwhile\ #1}%
+\captionsetup[algorithm]{name=Листинг}
 
 \bibliography{parts/biblio}
 

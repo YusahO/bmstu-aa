@@ -78,4 +78,4 @@ def ant_algorithm(visibility,
                     best_cost = cost
         update_pheromones(num_ants, pheromones, ant_paths, evaporation_rate)
 
-    return best_path, best_cost
+    return best_cost, best_path
