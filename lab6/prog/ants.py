@@ -1,81 +1,161 @@
-import random
 import numpy as np
+from random import random
+from defines import MIN_PHEROMONE
 
-# num_nodes = 5
-# pheromones = np.ones((num_nodes, num_nodes))
-# visibilities = np.array([
-#     [0, 2, 3, 4, 5],
-#     [1, 0, 2, 3, 4],
-#     [2, 1, 0, 2, 3],
-#     [3, 2, 1, 0, 2],
-#     [0, 3, 2, 1, 0]
-# ])
+def make_winter(matrix):
+    wmatrix = np.copy(matrix)
+    wmatrix[0][1] = 0
+    wmatrix[1][0] = 0
+    wmatrix[2][0] *= 2
+    return wmatrix
 
-
-def generate_ant_paths(num_ants, num_nodes):
-    ant_paths = []
-    for _ in range(num_ants):
-        path = [0]
-        unvisited_nodes = list(range(1, num_nodes))
-        random.shuffle(unvisited_nodes)
-        path.extend(unvisited_nodes)
-        path.append(0)
-        ant_paths.append(path)
-    return ant_paths
+def calc_q(matrix, size):
+    q = 0
+    count = 0
+    for i in range(size):
+        for j in range(size):
+            if i != j:
+                q += matrix[i][j]
+                count += 1
+    return q / count
 
 
-def update_pheromones(num_ants, pheromones, ant_paths, evaporation_rate):
-    for i in range(num_ants):
-        path = ant_paths[i]
-        for j in range(len(pheromones)):
-            start, end = path[j], path[j + 1]
-            pheromones[start, end] *= (1 - evaporation_rate)
-            pheromones[start, end] += 1 / len(path)
+def calc_pheromones(size):
+    min_phero = 1
+    pheromones = [[min_phero for _ in range(size)] for _ in range(size)]
+    return np.array(pheromones, dtype=np.float128)
 
 
-def calculate_path_cost(path, alpha, beta, visibility, pheromones):
-    cost = 0
-    for i in range(len(path) - 1):
-        start, end = path[i], path[i + 1]
-        pheromone_level = pheromones[start][end]
-        edge_visibility = visibility[start][end]
-        cost += (pheromone_level ** alpha) * (edge_visibility ** beta)
-    return cost
+def calc_visibility(matrix, size):
+    visibility = [
+        [(1.0 / matrix[i][j] if (i != j and matrix[i][j] != 0) else 0) for j in range(size)]
+        for i in range(size)
+    ]
+    return visibility
 
 
-def select_elite_ants(ant_paths, alpha, beta, visibility, pheromones, num_elite_ants):
-    elite_ant_paths = sorted(ant_paths, key=lambda path: calculate_path_cost(path, alpha, beta, visibility, pheromones))[
-        :num_elite_ants]
-    return elite_ant_paths
+def calc_visited_places(route, ants):
+    visited = [list() for _ in range(ants)]
+    for ant in range(ants):
+        visited[ant].append(route[ant])
+    return visited
 
 
-def ant_algorithm(visibility,
-                  evaporation_rate=0.5,
-                  alpha=1,
-                  beta=2,
-                  num_ants=10,
-                  num_iterations=100,
-                  num_elite_ants=2):
-    num_nodes = len(visibility)
-    pheromones = np.ones((num_nodes, num_nodes))
-    best_path = None
-    best_cost = float('inf')
-    for _ in range(num_iterations):
-        ant_paths = generate_ant_paths(num_ants, num_nodes)
-        elite_ant_paths = select_elite_ants(ant_paths, alpha, beta, visibility, pheromones, num_elite_ants)
+def calc_length(matrix, route):
+    length = 0
+    for way_len in range(1, len(route)):
+        length += matrix[route[way_len - 1], route[way_len]]
+    return length
 
-        for path in elite_ant_paths:
-            cost = calculate_path_cost(path, alpha, beta, visibility, pheromones)
-            if cost < best_cost:
-                best_path = path
-                best_cost = cost
-        for path in ant_paths:
-            if path[0] == 0 and path[-1] == 0:
-                cost = sum(visibility[path[i]][path[i+1]]
-                           for i in range(num_nodes-1))
-                if cost < best_cost:
-                    best_path = path[:-1]
-                    best_cost = cost
-        update_pheromones(num_ants, pheromones, ant_paths, evaporation_rate)
 
-    return best_cost, best_path
+def find_paths(pheromones, visibility, visited, places, ant, alpha, beta):
+    pk = [0] * places
+    for place in range(places):
+        if place not in visited[ant]:
+            ant_place = visited[ant][-1]
+            pk[place] = pow(pheromones[ant_place][place], alpha) * pow(
+                visibility[ant_place][place], beta
+            )
+        else:
+            pk[place] = 0
+    sum_pk = sum(pk)
+    for place in range(places):
+        pk[place] /= sum_pk
+    return pk
+
+
+def update_pheromones_with_elite(
+    matrix,
+    places,
+    visited,
+    pheromones,
+    q,
+    k_evaporation,
+    elite_ant_paths,
+    elite_pheromone_deposit,
+):
+    ants = places
+    for i in range(places):
+        for j in range(places):
+            delta = 0
+            for ant in range(ants):
+                length = calc_length(matrix, visited[ant])
+                delta += q / length
+            for elite_path in elite_ant_paths:
+                if (i, j) in zip(elite_path, elite_path[1:]):
+                    delta += elite_pheromone_deposit
+            pheromones[i][j] *= 1 - k_evaporation
+            pheromones[i][j] += delta
+            if pheromones[i][j] < MIN_PHEROMONE:
+                pheromones[i][j] = MIN_PHEROMONE
+    return pheromones
+
+
+def choose_next_loc_by_possibility(pk):
+    posibility = random()
+    choice = 0
+    chosen_loc = 0
+    while (choice < posibility) and (chosen_loc < len(pk)):
+        choice += pk[chosen_loc]
+        chosen_loc += 1
+    return chosen_loc
+
+
+def ant_algorithm(matrix, size, alpha, beta, k_evaporation, days, elite_ants, elite_pheromone_deposit=1.0):
+    q = calc_q(matrix, size)
+    best_path = []
+    best_dist = float("inf")
+    pheromones = calc_pheromones(size)
+    ants = size
+
+    elite_ant_paths = []
+
+    matrices = [matrix, make_winter(matrix)]
+    season = 0
+
+    visibilities = [
+        calc_visibility(matrices[0], size),
+        calc_visibility(matrices[1], size),
+    ]
+
+    for day in range(days):
+        if day % 60 == 0:
+            season = 1 - season
+        
+        route = np.arange(size)
+        visited = calc_visited_places(route, ants)
+
+        for ant in range(ants):
+            while len(visited[ant]) != size:
+                pk = find_paths(
+                    pheromones, visibilities[season], visited, size, ant, alpha, beta
+                )
+                chosen_loc = choose_next_loc_by_possibility(pk)
+                visited[ant].append(chosen_loc - 1)
+                if ant < elite_ants:
+                    elite_ant_paths.append(visited[ant])
+                    
+            cur_length = calc_length(matrix, visited[ant])
+            if cur_length < best_dist:
+                best_dist = cur_length
+                best_path = visited[ant]
+
+        for elite_path in elite_ant_paths:
+            for i in range(len(elite_path) - 1):
+                pheromones[elite_path[i]][elite_path[i + 1]] *= (
+                    1 + elite_pheromone_deposit
+                )
+
+        pheromones = update_pheromones_with_elite(
+            matrices[season],
+            size,
+            visited,
+            pheromones,
+            q,
+            k_evaporation,
+            elite_ant_paths,
+            elite_pheromone_deposit,
+        )
+        pheromones /= np.linalg.norm(pheromones)
+
+    return best_dist, best_path
