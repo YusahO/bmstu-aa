@@ -30,7 +30,7 @@ def testTime():
         timeFullCombinations.append(end - start)
 
         start = process_time()
-        ant_algorithm(matrix, size, 0.5, 0.5, 0.5, 250)
+        ant_algorithm(matrix, size, 0.5, 0.5, 0.5, 250, 1, 0.5)
         end = process_time()
 
         timeAntAlg.append(end - start)
@@ -55,9 +55,9 @@ def testTime():
     # Graph
     fig = plt.figure(figsize=(10, 7))
     plot = fig.add_subplot()
-    plot.plot(sizes, timeFullCombinations, label = "Полный перебор")
-    plot.plot(sizes, timeAntAlg, label="Муравьиный алгоритм")
-
+    plot.plot(sizes, timeFullCombinations, linestyle='--', marker='*', markersize=10, label = "Полный перебор")
+    plot.plot(sizes, timeAntAlg, marker='o', markersize=10, label="Муравьиный алгоритм")
+    plt.yscale('log')
     plt.legend()
     plt.grid()
     plt.title("Временные характеристики")
@@ -71,15 +71,11 @@ def parametrization(type = CSV):
     alpha_arr = [num / 10 for num in range(1, 10)]
     k_eva_arr = [num / 10 for num in range(1, 9)]
     days_arr = [1, 3, 5, 10, 50, 100, 300, 500]
-    elite_deposites = [0.2, 0.4, 0.8, 1.0]
-    elite_amts = [1, 5, 10]
 
     size = 9
 
     matrix1 = read_matrix_from_file("data/param_low_diff.csv")
     matrix2 = read_matrix_from_file("data/param_high_diff.csv")
-    
-    print(matrix1.shape)
 
     optimal1 = brute_force(matrix1, size)
     optimal2 = brute_force(matrix2, size)
@@ -90,36 +86,32 @@ def parametrization(type = CSV):
     count = 0
     count_all = len(alpha_arr) * len(k_eva_arr)
 
-    print()
-
     for alpha in alpha_arr:
         beta = 1 - alpha
         for k_eva in k_eva_arr:
             count += 1
             for days in days_arr:
-                for ed in elite_deposites:
-                    for eamt in elite_amts:
-                        res1 = ant_algorithm(matrix1, size, alpha, beta, k_eva, days, eamt, ed)
-                        res2 = ant_algorithm(matrix2, size, alpha, beta, k_eva, days, eamt, ed)
+                res1 = ant_algorithm(matrix1, size, alpha, beta, k_eva, days, 2, 0.5)
+                res2 = ant_algorithm(matrix2, size, alpha, beta, k_eva, days, 2, 0.5)
 
-                        if (type == LATEX):
-                            sep = " & "
-                            ender = " \\\\"
-                        elif (type == CSV):
-                            sep = ", "
-                            ender = ""
-                        else:
-                            sep = " | "
-                            ender = ""
+                if (type == LATEX):
+                    sep = " & "
+                    ender = " \\\\"
+                elif (type == CSV):
+                    sep = ", "
+                    ender = ""
+                else:
+                    sep = " | "
+                    ender = ""
 
-                        str1 = "%4.1f%s%4.1f%s%4d%s%5d%s%5d%s%5d%s%5d%s\n" \
-                            % (alpha, sep, k_eva, sep, days, sep, eamt, sep, ed, sep, optimal1[0], sep, res2[0] - optimal2[0], ender)
+                str1 = "%4.1f%s%4.1f%s%4d%s%5d%s%5d%s\n" \
+                    % (alpha, sep, k_eva, sep, days, sep, optimal1[0], sep, res1[0] - optimal1[0], ender)
 
-                        str2 = "%4.1f%s%4.1f%s%4d%s%5d%s%5d%s%5d%s%5d%s\n" \
-                            % (alpha, sep, k_eva, sep, days, sep, eamt, sep, ed, sep, optimal2[0], sep, res2[0] - optimal2[0], ender)
+                str2 = "%4.1f%s%4.1f%s%4d%s%5d%s%5d%s\n" \
+                    % (alpha, sep, k_eva, sep, days, sep, optimal2[0], sep, res2[0] - optimal2[0], ender)
 
-                        file1.write(str1)
-                        file2.write(str2)
+                file1.write(str1)
+                file2.write(str2)
 
             print("Progress: %3d%s" %((count / count_all) * 100, "%"))
 

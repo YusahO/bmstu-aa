@@ -7,7 +7,7 @@ def ant_algorithm(matrix, size, alpha, beta, k_evaporation, days, elite_ants, el
 
     elite_ant_paths = []
 
-    matrices = [make_summer(matrix), make_winter(matrix)]
+    matrices = [matrix, matrix]
     season = 0
 
     visibilities = [
@@ -15,9 +15,12 @@ def ant_algorithm(matrix, size, alpha, beta, k_evaporation, days, elite_ants, el
         calc_visibility(matrices[1], size),
     ]
 
+    elite_paths_updated = False
+
     for day in range(days):
-        if day % 60 == 0:
+        if day % 60 == 0:  # Update season
             season = 1 - season
+            elite_paths_updated = False  # Reset elite paths update flag
 
         route = np.arange(size)
         visited = calc_visited_places(route, ants)
@@ -37,23 +40,26 @@ def ant_algorithm(matrix, size, alpha, beta, k_evaporation, days, elite_ants, el
                 best_dist = cur_length
                 best_path = visited[ant]
 
-        for elite_path in elite_ant_paths:
-            for i in range(len(elite_path) - 1):
-                pheromones[elite_path[i]][elite_path[i + 1]] *= (
-                    1 + elite_pheromone_deposit
-                )
+            if ant < elite_ants and not elite_paths_updated:
+                for elite_path in elite_ant_paths:
+                    for i in range(len(elite_path) - 1):
+                        pheromones[elite_path[i]][elite_path[i + 1]] *= (
+                            1 + elite_pheromone_deposit
+                        )
+                elite_paths_updated = True
 
-        pheromones = update_pheromones_with_elite(
-            matrices[season],
-            size,
-            visited,
-            pheromones,
-            q,
-            k_evaporation,
-            elite_ant_paths,
-            elite_pheromone_deposit,
-        )
-        pheromones /= np.linalg.norm(pheromones)
+        if day % 10 == 0:
+            pheromones = update_pheromones_with_elite(
+                matrices[season],
+                size,
+                visited,
+                pheromones,
+                q,
+                k_evaporation,
+                elite_ant_paths,
+                elite_pheromone_deposit,
+            )
+            pheromones /= np.linalg.norm(pheromones)
 
     return best_dist, best_path
 
